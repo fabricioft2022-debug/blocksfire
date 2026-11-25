@@ -3245,12 +3245,14 @@ window.__v3=function(c,sk,cx,by,u,t,yaw,emote){
   /* ===== Online (IDs + equipes por código) usando o Firestore do projeto ===== */
   let onP=null,idT=null;
   const jclone=o=>JSON.parse(JSON.stringify(o));
+  const tmoF=(p,ms)=>Promise.race([p,new Promise((_,r)=>setTimeout(()=>r(new Error('O servidor não respondeu. Confira a internet e as regras do Firestore.')),ms||12000))]);
+  function chip(t,hide){let c=document.getElementById('onChip');if(!c){c=document.createElement('div');c.id='onChip';c.style.cssText='position:fixed;z-index:9998;left:50%;transform:translateX(-50%);bottom:calc(env(safe-area-inset-bottom,0px) + 6px);background:rgba(0,0,0,.75);color:#fff;font:11px sans-serif;padding:3px 10px;border-radius:10px;pointer-events:none';document.body.appendChild(c)}c.textContent=t;clearTimeout(c._t);if(hide)c._t=setTimeout(()=>c.remove(),hide)}
   async function fsDb(){
-    const {FS,db}=await fsInit();
+    const {FS,db}=await tmoF(fsInit(),15000);
     const R=p=>FS.doc(db,...p.split('/'));
     return{doc:p=>({
-      get:async()=>{const s=await FS.getDoc(R(p));return{data:()=>s.exists()?s.data():null}},
-      set:async o=>{await FS.setDoc(R(p),jclone(o))},
+      get:async()=>{const s=await tmoF(FS.getDoc(R(p)));return{data:()=>s.exists()?s.data():null}},
+      set:async o=>{await tmoF(FS.setDoc(R(p),jclone(o)))},
       acquire:async()=>({acquired:true})})};
   }
   async function pushId(){
@@ -3260,6 +3262,7 @@ window.__v3=function(c,sk,cx,by,u,t,yaw,emote){
   }
   function onErr(u,e){
     const msg=(e&&((e.code?e.code+': ':'')+(e.message||e)))||'erro desconhecido';
+    chip('online v3: erro');
     let b=document.getElementById('onErr');
     if(!b){b=document.createElement('div');b.id='onErr';b.style.cssText='position:fixed;z-index:9999;left:8px;right:8px;top:calc(env(safe-area-inset-top,0px) + 8px);background:#7a1620;color:#fff;border:1px solid #ff6a6a;padding:10px 12px;font:13px/1.35 sans-serif;display:flex;flex-direction:column;gap:8px';document.body.appendChild(b)}
     b.innerHTML='<b>Online indisponível</b><div id="onMsg"></div><div style="display:flex;gap:8px"><button id="onRetry" style="flex:1;padding:8px">Tentar de novo</button><button id="onClose" style="flex:1;padding:8px">Fechar</button></div>';
@@ -3267,11 +3270,11 @@ window.__v3=function(c,sk,cx,by,u,t,yaw,emote){
     b.querySelector('#onClose').onclick=()=>b.remove();
     b.querySelector('#onRetry').onclick=()=>{b.remove();goOnline(u)};
   }
-  setTimeout(()=>{const u=window.BF_GOOGLE_USER;if(u&&u.uid&&window.CL&&!window.CL.on&&!onP)goOnline(u)},6000);
+  setTimeout(()=>{const u=window.BF_GOOGLE_USER;if(u&&u.uid&&window.CL&&!window.CL.on&&!onP)goOnline(u);else if(!u)chip('online v3: sem login detectado',8000)},6000);
   function goOnline(u){
     if(onP)return onP;
     onP=(async()=>{
-      const CL=window.CL;
+      const CL=window.CL;chip('online v3: conectando…');
       for(let i=0;i<40&&!CL.ready;i++)await new Promise(r=>setTimeout(r,250));
       if(!CL.shared){CL.db=await fsDb();CL.shared=true}
       const uref=CL.db.doc('uids/'+u.uid);
@@ -3289,6 +3292,7 @@ window.__v3=function(c,sk,cx,by,u,t,yaw,emote){
       S.pid=pid;S.acct=(u.displayName||S.name||'').slice(0,24);CL.on=true;S.friends=S.friends||[];
       save();pushId();
       try{CL.myid();renderFriends()}catch(e){}
+      chip('online v3: ok · ID '+pid,8000);
     })().catch(e=>{console.warn('online',e);onP=null;onErr(u,e)});
     return onP;
   }
