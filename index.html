@@ -3258,6 +3258,16 @@ window.__v3=function(c,sk,cx,by,u,t,yaw,emote){
       await CL.db.doc('ids/'+S.pid).set({name:S.name||'Jogador',skin:S.skin||'recruta',level:S.level||1,n:+S.pid,wins:st.wins||0,kills:st.kills||0,matches:st.matches||0,ver:CL.verOk?1:0})}
     catch(e){console.warn('id push',e)}
   }
+  function onErr(u,e){
+    const msg=(e&&((e.code?e.code+': ':'')+(e.message||e)))||'erro desconhecido';
+    let b=document.getElementById('onErr');
+    if(!b){b=document.createElement('div');b.id='onErr';b.style.cssText='position:fixed;z-index:9999;left:8px;right:8px;top:calc(env(safe-area-inset-top,0px) + 8px);background:#7a1620;color:#fff;border:1px solid #ff6a6a;padding:10px 12px;font:13px/1.35 sans-serif;display:flex;flex-direction:column;gap:8px';document.body.appendChild(b)}
+    b.innerHTML='<b>Online indisponível</b><div id="onMsg"></div><div style="display:flex;gap:8px"><button id="onRetry" style="flex:1;padding:8px">Tentar de novo</button><button id="onClose" style="flex:1;padding:8px">Fechar</button></div>';
+    b.querySelector('#onMsg').textContent=msg;
+    b.querySelector('#onClose').onclick=()=>b.remove();
+    b.querySelector('#onRetry').onclick=()=>{b.remove();goOnline(u)};
+  }
+  setTimeout(()=>{const u=window.BF_GOOGLE_USER;if(u&&u.uid&&window.CL&&!window.CL.on&&!onP)goOnline(u)},6000);
   function goOnline(u){
     if(onP)return onP;
     onP=(async()=>{
@@ -3279,7 +3289,7 @@ window.__v3=function(c,sk,cx,by,u,t,yaw,emote){
       S.pid=pid;S.acct=(u.displayName||S.name||'').slice(0,24);CL.on=true;S.friends=S.friends||[];
       save();pushId();
       try{CL.myid();renderFriends()}catch(e){}
-    })().catch(e=>{console.warn('online',e);onP=null;try{toast('Online indisponível: '+(e&&e.message||e))}catch(_){}});
+    })().catch(e=>{console.warn('online',e);onP=null;onErr(u,e)});
     return onP;
   }
   const _sv3=save;
