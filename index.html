@@ -388,7 +388,7 @@ input.txt{width:100%;max-width:300px;height:42px;background:#0f1724;color:var(--
   <header class="topbar">
     <button class="profile" id="profBtn" aria-label="Perfil"><span class="lvl" id="lvl">1</span><span class="pn"><span class="pnr"><span id="pRank"></span><b id="pName">Jogador</b></span><span class="xpbar"><i id="xpFill"></i></span></span></button>
     <div class="cur"><span class="chip"><span data-ic="gem"></span><b id="gems">0</b></span><span class="chip"><span data-ic="coin"></span><b id="gold">0</b></span><button class="plus" data-open="loja" aria-label="Comprar na loja">+</button></div>
-    <div class="tools"><button class="sq" id="lobbyCfgBtn" aria-label="Configurações" title="Configurações">⚙</button><button class="sq" id="sndBtn" aria-label="Som">♪</button><button class="sq" id="fsBtn" aria-label="Tela cheia">⛶</button></div>
+    <div class="tools"><button class="sq" id="lobbyCfgBtn" aria-label="Configurações" title="Configurações">⚙</button><button class="sq" id="sndBtn" aria-label="Som">♪</button></div>
   </header>
   <nav class="sidemenu" aria-label="Menu principal">
     <button class="newsbtn" data-open="novidades">Novidades</button>
@@ -482,6 +482,37 @@ input.txt{width:100%;max-width:300px;height:42px;background:#0f1724;color:var(--
 </div>
 </div>
 
+<style>
+/* ===== telas dedicadas (foto/banner e recompensa de skin): ficam sozinhas na tela ===== */
+body.bf-solo #app{visibility:hidden!important;pointer-events:none!important}
+.bfsc{position:fixed;inset:0;z-index:240;display:flex;flex-direction:column;align-items:center;background:radial-gradient(circle at 50% 18%,#1d2b44,#0a1019 78%);color:var(--fg);padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;overflow:hidden}
+.bfsc[hidden]{display:none!important}
+.bfbox{width:min(520px,100%);flex:1;min-height:0;display:flex;flex-direction:column}
+.bfh{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#1a2638;border-bottom:3px solid var(--accent)}
+.bfh h2{flex:1;margin:0;font:400 18px var(--f-display);letter-spacing:.04em}
+.bfb{flex:1;min-height:0;overflow:auto;padding:14px}
+.bff{padding:10px 14px;background:#1a2638;border-top:1px solid var(--line)}
+.bff .btn{width:100%}
+.pcz2{display:flex;flex-direction:column;gap:8px;margin:6px 0 12px}
+.pcn{display:flex;align-items:center;gap:6px;min-width:0;font:400 20px var(--f-display)}
+.pcn .vn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pcrow{display:flex;gap:12px;align-items:center}
+.pfp2{width:112px;height:112px;flex:none;border:2px solid var(--line);overflow:hidden;background:var(--panel2)}
+.pfb2{width:100%;max-width:360px;aspect-ratio:3.6/1;border:2px solid var(--line);overflow:hidden;background:var(--panel2)}
+.pfp2 img,.pfb2 img{display:block;width:100%;height:100%;object-fit:cover;user-select:none;-webkit-user-drag:none}
+.bfrw{justify-content:center;text-align:center;overflow:auto;padding:16px;gap:12px}
+.bfrw .rwt{font:400 28px var(--f-display);color:#ffd23f;letter-spacing:.05em;text-shadow:0 0 18px rgba(255,200,60,.6)}
+.rwskin{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 28px;border:2px solid var(--rc,#ffb400);background:radial-gradient(circle at 50% 38%,color-mix(in srgb,var(--rc,#ffb400) 38%,transparent),var(--panel2) 72%)}
+.rwskin canvas{width:156px;height:169px}
+.rwskin .cn{font:400 20px var(--f-display)}.rwskin .cr{font-size:12px;letter-spacing:.1em;color:var(--rc,#ffb400);font-weight:700}
+.rwbn{width:min(360px,100%);display:flex;flex-direction:column;gap:6px;align-items:center}
+.rwbn small{color:var(--mut);font-size:12px;letter-spacing:.08em;text-transform:uppercase}
+.rwbn .pfb2{width:100%}
+.rwbtns{display:flex;gap:10px;width:min(360px,100%)}
+.rwbtns .btn{flex:1;padding:12px 8px}
+</style>
+<div id="pcSel" class="bfsc" role="dialog" aria-modal="true" aria-label="Escolher foto e banner" hidden></div>
+<div id="skRw" class="bfsc bfrw" role="dialog" aria-modal="true" aria-label="Skin desbloqueada" hidden></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <style>
 .hbtn:not(.sm){background:radial-gradient(circle at 35% 30%,#ffd45a,#ff7a00 70%);border:3px solid #fff0b0;color:#3a1a00;box-shadow:0 0 0 3px rgba(0,0,0,.35),0 0 18px rgba(255,140,0,.6)}
@@ -660,14 +691,11 @@ const pubProf=()=>({pf:pResolve('pfp'),pb:pResolve('pbn')});
 function pBlock(pf,pb,sk){const f=hasP(pf)?pf:(hasP(sk)?sk:'recruta'),b=hasP(pb)?pb:(hasP(sk)?sk:'recruta');
  return`<div class="pfx"><div class="pfp"><img src="${PIMG[f].p}" alt="Foto de perfil" draggable="false"></div><div class="pfb"><img src="${PIMG[b].b}" alt="Banner" draggable="false"></div></div>`}
 let pcOpen=false,pcTab='p';
+const pgi=id=>hasP(id)?id:'recruta';
+const pNameHtml=()=>'<span class="vn">'+BFV.esc(S.name)+'</span>'+(S.ver?BFV.img():'');
 function profCust(){
- const f=pResolve('pfp'),b=pResolve('pbn'),un=pUnl();
- let h='<h4 class="fht">Personalização</h4><div class="pcz">'+pBlock(f,b)+'<button class="pplus'+(pcOpen?' on':'')+'" data-pf="'+(pcOpen?'close':'open')+'" aria-label="Coleção de fotos e banners" title="Coleção"><span>+</span></button></div>';
- if(pcOpen){const k=pcTab==='p'?'p':'b',cur=pcTab==='p'?f:b;
-  h+=`<div class="pctabs"><button class="btn${pcTab==='p'?' pri':''}" data-pf="tab" data-t="p">Fotos</button><button class="btn${pcTab==='b'?' pri':''}" data-pf="tab" data-t="b">Banners</button><button class="btn" data-pf="close">Fechar</button></div>`;
-  h+=un.length?`<div class="pcg ${k==='p'?'sq':'wd'}">`+un.map(id=>`<button class="pcit${cur===id?' on':''}" data-pf="pick" data-id="${id}" aria-label="${pName(id)}"><img src="${PIMG[id][k]}" alt="" draggable="false"><small>${pName(id)}</small></button>`).join('')+'</div>':'<p class="muted">Sua coleção está vazia. Compre uma skin para desbloquear fotos e banners.</p>';
- }
- return h}
+ const f=pgi(pResolve('pfp')),b=pgi(pResolve('pbn'));
+ return '<h4 class="fht">Personalização</h4><div class="pcz2"><div class="pcn">'+pNameHtml()+'</div><div class="pcrow"><div class="pfp2"><img src="'+PIMG[f].p+'" alt="Foto de perfil" draggable="false"></div><button class="pplus" data-pf="open" aria-label="Escolher foto e banner" title="Escolher foto e banner"><span>+</span></button></div><div class="pfb2"><img src="'+PIMG[b].b+'" alt="Banner" draggable="false"></div></div>'}
 try{if(window.THREE){skinTex('rosaneon');skinTex('cianoneon');skinTex('skin829');skinTex('cinzasombrio');skinTex('vermelhofogo');skinTex('azulcosmico')}}catch(e){}
 const WEAPONS=[
  {id:'pistola',n:'Pistola Pixel',p:0,dmg:18,rate:330,mag:12,rel:1000,spd:900,rng:520,sp:.03,pel:1,col:'#c9d4e5',len:16,bc:'#fff6c8',bg:'#ffc83a',bl:15,bt:2.2,fan:0},
@@ -1470,7 +1498,7 @@ modal.addEventListener('click',e=>{
   if(a==='tab'){shopTab=id;return renderPanel()}
  if(a==='equip'){S.skin=id;S.fit={};sfx.ui()}
  else if(a==='equipW'){S.weapon=id;sfx.ui()}
- else if(a==='buySkin'){const s=skinOf(id),pr=b.dataset.disc?Math.floor(s.p*.75):s.p;if(S.gems<pr)return toast('Diamantes insuficientes');S.gems-=pr;S.skins.push(id);S.skin=id;S.fit={};toast(s.n+' comprada! Conjunto e peças separadas liberados: monte seu visual no Cofre');sfx.pick()}
+ else if(a==='buySkin'){const s=skinOf(id),pr=b.dataset.disc?Math.floor(s.p*.75):s.p;if(S.skins.includes(id))return;if(S.gems<pr)return toast('Diamantes insuficientes');S.gems-=pr;S.skins.push(id);if(!Array.isArray(S.pun))S.pun=[];if(!S.pun.includes(id))S.pun.push(id);save();refreshCur();sfx.pick();return showSkinReward(id)}
  else if(a==='buyW'){const w=weaponOf(id),pr=b.dataset.disc?Math.floor(w.p*.75):w.p;if(S.gold<pr)return toast('Ouro insuficiente');S.gold-=pr;S.weapons.push(id);S.weapon=id;toast(w.n+' comprada e equipada');sfx.pick()}
  else if(a==='exch'){const g=+b.dataset.g,o=+b.dataset.o;if(S.gems<g)return toast('Diamantes insuficientes');S.gems-=g;S.gold+=o;toast('Você recebeu '+o+' de ouro');sfx.pick()}
  else if(a==='evo'){const lv=S.evo[id]||0,cost=150*(lv+1);if(S.gold<cost)return toast('Ouro insuficiente');S.gold-=cost;S.evo[id]=lv+1;toast('Arma evoluída para o nível '+(lv+1));sfx.pick()}
@@ -1518,11 +1546,37 @@ document.addEventListener('click',e=>{
 $('#profBtn').addEventListener('click',()=>{pcOpen=false;pcTab='p'},true);
 $('#profBtn').addEventListener('click',()=>openPanel('perfil'));
 mBody.addEventListener('click',e=>{const b=e.target.closest('[data-pf]');if(!b)return;const a=b.dataset.pf;
- if(a==='open'){pcOpen=true;pcTab='p'}else if(a==='close')pcOpen=false;else if(a==='tab')pcTab=b.dataset.t==='b'?'b':'p';
+ if(a==='open'){return openPcSel()}else if(a==='close')pcOpen=false;else if(a==='tab')pcTab=b.dataset.t==='b'?'b':'p';
  else if(a==='pick'){const id=b.dataset.id;if(!pUnl().includes(id))return;S[pcTab==='p'?'pfp':'pbn']=id;save();try{sfx.ui()}catch(_){}}
  renderPanel()});
+/* ===== telas dedicadas: escolha de foto/banner e recompensa de skin ===== */
+const pcSel=$('#pcSel'),skRw=$('#skRw');let rwId=null;
+function bfSolo(el){[pcSel,skRw].forEach(x=>{if(x!==el)x.hidden=true});if(el){modal.hidden=true;el.hidden=false;document.body.classList.add('bf-solo')}else document.body.classList.remove('bf-solo')}
+function bfBack(){bfSolo(null);if(cur){modal.hidden=false;renderPanel()}else openPanel('perfil')}
+function renderPcSel(){
+ const keep=pcSel.querySelector('.bfb'),st=keep?keep.scrollTop:0,f=pgi(pResolve('pfp')),b=pgi(pResolve('pbn')),un=pUnl(),k=pcTab==='p'?'p':'b',sel=pcTab==='p'?f:b;
+ pcSel.innerHTML='<div class="bfbox"><header class="bfh"><h2>Foto e banner</h2><button class="xbtn" data-pf="done" aria-label="Voltar ao perfil">×</button></header><div class="bfb"><div class="pcz2"><div class="pcn">'+pNameHtml()+'</div><div class="pfp2"><img src="'+PIMG[f].p+'" alt="Foto de perfil" draggable="false"></div><div class="pfb2"><img src="'+PIMG[b].b+'" alt="Banner" draggable="false"></div></div>'
+  +'<div class="pctabs"><button class="btn'+(pcTab==='p'?' pri':'')+'" data-pf="tab" data-t="p">Fotos</button><button class="btn'+(pcTab==='b'?' pri':'')+'" data-pf="tab" data-t="b">Banners</button></div>'
+  +'<div class="pcg '+(k==='p'?'sq':'wd')+'">'+un.map(id=>'<button class="pcit'+(sel===id?' on':'')+'" data-pf="pick" data-id="'+id+'" aria-label="'+pName(id)+'"><img src="'+PIMG[id][k]+'" alt="" draggable="false"><small>'+pName(id)+'</small></button>').join('')+'</div></div>'
+  +'<div class="bff"><button class="btn pri" data-pf="done">Concluído</button></div></div>';
+ const nb=pcSel.querySelector('.bfb');if(nb)nb.scrollTop=st}
+function openPcSel(){pcTab='p';renderPcSel();bfSolo(pcSel)}
+pcSel.addEventListener('click',e=>{const b=e.target.closest('[data-pf]');if(!b)return;const a=b.dataset.pf;
+ if(a==='tab'){pcTab=b.dataset.t==='b'?'b':'p';renderPcSel()}
+ else if(a==='pick'){const id=b.dataset.id;if(!pUnl().includes(id))return;S[pcTab==='p'?'pfp':'pbn']=id;save();try{sfx.ui()}catch(_){}renderPcSel()}
+ else if(a==='done')bfBack()});
+function showSkinReward(id){
+ const s=skinOf(id),hb=hasP(id);rwId=id;
+ skRw.innerHTML='<div class="rwt">SKIN DESBLOQUEADA!</div><div class="rwskin" style="--rc:'+RAR[s.r].c+'"><canvas data-skin="'+id+'" width="240" height="260"></canvas><div class="cn">'+s.n+'</div><div class="cr">'+RAR[s.r].n.toUpperCase()+'</div></div>'
+  +(hb?'<div class="rwbn"><small>Banner desbloqueado</small><div class="pfb2"><img src="'+PIMG[id].b+'" alt="Banner" draggable="false"></div></div>':'')
+  +'<div class="rwbtns"><button class="btn pri" data-rw="equip">EQUIPAR</button><button class="btn" data-rw="close">FECHAR</button></div>';
+ bfSolo(skRw);paintCanvases(skRw);try{sfx.win()}catch(_){}}
+skRw.addEventListener('click',e=>{const b=e.target.closest('[data-rw]');if(!b||!rwId)return;const id=rwId;rwId=null;
+ if(b.dataset.rw==='equip'&&S.skins.includes(id)){S.skin=id;S.fit={};if(hasP(id)&&pUnl().includes(id))S.pbn=id;save();try{sfx.ui()}catch(_){}toast(skinOf(id).n+(hasP(id)?' e banner equipados':' equipada'))}
+ bfBack();refreshCur()});
+document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!pcSel.hidden)bfBack();else if(!skRw.hidden&&rwId){rwId=null;bfBack()}});
 $('#sndBtn').addEventListener('click',()=>{S.sound=!S.sound;save();refreshCur();sfx.ui()});
-$('#fsBtn').addEventListener('click',()=>{try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}catch(e){}});
+
 function syncSel(){S.mode=effMode();$('#modeSel').value=gmv();$('#teamSel').value=ttv();$('#mapSel').value=['floresta','deserto','cidade'].includes(S.mapTheme)?S.mapTheme:'floresta';$('#mapSel').disabled=gmv()==='glad';$('#modeDesc').textContent=modeText();$$('[data-ic]').forEach(e=>{e.innerHTML=IC[e.dataset.ic]});refreshCur()}
 $('#modeSel').addEventListener('change',e=>{S.gm=e.target.value;S.tt=ttv();save();syncSel()});
 $('#teamSel').addEventListener('change',e=>{S.tt=e.target.value;S.gm=gmv();save();syncSel()});
@@ -1984,7 +2038,7 @@ function aimTarget(p,fc,assist){
 // Para dar capa (headshot), o jogador sobe a mira até a cabeça; se já estiver na cabeça, continua capa.
 function aimGlue(p,dt,ia,ib,fire){
  const g=M&&M.alk;if(!g)return;
- if(!fire||!p.alive||M.over||M.paused||M.t>g.until||!g.t.alive||document.pointerLockElement){M.alk=null;return}
+ if(!fire||!p.alive||M.over||M.paused||M.t>g.until||!g.t.alive||document.pointerLockElement||p.mv){M.alk=null;return}/* andando: a mira grudada nunca gira a câmera */
  g.dr=(g.dr||0)*Math.max(0,1-dt*4)+ia;
  if(Math.abs(g.dr)>.035){M.alk=null;return}
  const t=g.t,k=Math.min(1,dt*30);
@@ -4346,6 +4400,257 @@ async function check(){const C=window.CL;if(!C||!C.db)return;try{const d=(await 
 window.BFLock={check};
 document.getElementById('updA').onclick=()=>document.getElementById('admL').click();
 const t0=Date.now(),iv=setInterval(()=>{const C=window.CL;if(!C||(!C.ready&&Date.now()-t0<12000))return;clearInterval(iv);check();setInterval(check,15000)},200);
+})();
+</script>
+<style id="bf-adapt-css">
+/* ===== BF-ADAPT: adaptação automática para telas pequenas / DPI diferentes ===== */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+
+/* Botões do HUD respeitam a área segura (notch, cantos arredondados, barra de gestos) */
+#match .hudbtns{inset:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+
+/* Rótulos nunca ficam menores que o legível */
+#match .hudbtns .hbtn .bl{font-size:max(calc(var(--u)*.125),8px)}
+#match .hudbtns #btnF .bl{font-size:max(calc(var(--u)*.17),10px)}
+@media (max-width:819px){#wpn .wn{font-size:9px}}
+
+/* Alvos de toque confortáveis em telas de toque */
+@media (pointer:coarse) and (max-width:819px){.hbtn.sm{width:44px;height:44px}}
+@media (pointer:coarse){
+ .xbtn,.sq{min-width:42px;min-height:42px}
+ .btn,.card .btn,.ml-it .btn,.ml-h .btn{min-height:42px}
+}
+
+/* Minimapa menor quando a tela é baixa/estreita */
+@media (max-height:360px) and (min-aspect-ratio:1/1){#mini{width:92px;height:92px}}
+@media (max-width:340px){#mini{width:104px;height:104px}}
+
+/* Grades de cartas: 2 colunas mesmo em telas muito estreitas */
+.grid{grid-template-columns:repeat(auto-fill,minmax(min(148px,46%),1fr))}
+
+/* Cabeçalho dos painéis em telas estreitas */
+@media (max-width:380px){
+ .sheet>header{padding:8px 10px;gap:6px}
+ .sheet h2{font-size:17px}
+ .mcur{gap:6px;font-size:13px}
+ .tab{padding:8px 10px}
+}
+@media (max-aspect-ratio:1/1) and (max-width:400px){.tab4{letter-spacing:0;padding:0 3px}}
+
+/* Lobby: estados ativados automaticamente pelo ajuste (JS) */
+#lobby.bf-wrap .topbar{flex-wrap:wrap;row-gap:6px}
+#lobby.bf-lean .lobby-feature{display:none}
+#lobby.bf-stack .tab4{flex-direction:column;gap:2px;height:44px;padding:0 8px;font-size:11px;justify-content:center}
+
+/* Tela de entrada: rolagem e tamanhos proporcionais */
+#gate{overflow-y:auto;-webkit-overflow-scrolling:touch;align-items:flex-start;padding:max(24px,env(safe-area-inset-top,0px)) max(24px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(24px,env(safe-area-inset-left,0px))}
+#gate .gbox{margin:auto}
+.gbox h1{font-size:clamp(28px,11vw,42px)}
+@media (max-height:520px){
+ #gcv{width:110px;height:121px}
+ .gbox h1{font-size:clamp(24px,7vh,34px)}
+ .gbox p{margin:4px 0 10px}
+ #gate{padding-top:max(12px,env(safe-area-inset-top,0px));padding-bottom:max(12px,env(safe-area-inset-bottom,0px))}
+}
+</style>
+<script id="bf-adapt-js">
+/* ===== BF-ADAPT: ajuste automático de layout (lobby + HUD da partida) ===== */
+(function(){
+'use strict';
+if(window.__bfAdapt)return;window.__bfAdapt=1;
+const $=s=>document.querySelector(s);
+
+/*SEP-START*/
+/* Resolve sobreposições e itens fora da tela. Só mexe no que precisa. */
+function bfSeparate(items,B,G){
+ const rectOf=it=>{const px=it.x+it.ox*it.w,py=it.y+it.oy*it.h,l=px-(px-it.x)*it.sc+it.dx,t=py-(py-it.y)*it.sc+it.dy;return{l:l,t:t,r:l+it.w*it.sc,b:t+it.h*it.sc}};
+ const hit=(a,b,g)=>a.l<b.r+g&&a.r>b.l-g&&a.t<b.b+g&&a.b>b.t-g;
+ const inB=r=>r.l>=B.l-.5&&r.t>=B.t-.5&&r.r<=B.r+.5&&r.b<=B.b+.5;
+ const act=items.filter(i=>!i.frozen);
+ const clean=m=>{const r=rectOf(m);return inB(r)&&!act.some(o=>o!==m&&hit(r,rectOf(o),G))};
+ for(let pass=0;pass<10;pass++){
+  let ch=false;
+  for(let i=0;i<act.length;i++)for(let j=i+1;j<act.length;j++){
+   const a=act[i],b=act[j];
+   if(!hit(rectOf(a),rectOf(b),G))continue;
+   const m=a.rank<b.rank?a:b,o=m===a?b:a;
+   if(m.fix){if(m.sc>.8){m.sc=Math.max(.8,m.sc-.06);ch=true}continue}
+   const ro=rectOf(o),rm=rectOf(m);
+   const cand=[[ro.r-rm.l+G,0],[ro.l-rm.r-G,0],[0,ro.b-rm.t+G],[0,ro.t-rm.b-G]].sort((p,q)=>Math.abs(p[0]+p[1])-Math.abs(q[0]+q[1]));
+   const best=Math.abs(cand[0][0]+cand[0][1]);
+   if(best>1.1*Math.max(m.w,m.h)&&m.sc>.8){m.sc=Math.max(.8,m.sc*.9);ch=true;continue}
+   let done=false;
+   for(const c of cand){m.dx+=c[0];m.dy+=c[1];if(clean(m)){done=true;break}m.dx-=c[0];m.dy-=c[1]}
+   if(done){ch=true;continue}
+   if(m.sc>.8){m.sc=Math.max(.8,m.sc*.9);ch=true}
+  }
+  if(!ch)break;
+ }
+ for(const it of items){
+  const r=rectOf(it);let dx=0,dy=0;
+  if(r.l<B.l)dx=B.l-r.l;else if(r.r>B.r)dx=B.r-r.r;
+  if(r.t<B.t)dy=B.t-r.t;else if(r.b>B.b)dy=B.b-r.b;
+  it.dx+=dx;it.dy+=dy;
+ }
+ return items;
+}
+/*SEP-END*/
+
+const probe=document.createElement('div');
+probe.setAttribute('aria-hidden','true');
+probe.style.cssText='position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)';
+document.body.appendChild(probe);
+function insets(){const c=getComputedStyle(probe);return{t:parseFloat(c.paddingTop)||0,r:parseFloat(c.paddingRight)||0,b:parseFloat(c.paddingBottom)||0,l:parseFloat(c.paddingLeft)||0}}
+const shown=el=>!!el&&el.getClientRects().length>0;
+const fl=v=>Math.floor(v*100)/100;
+function clr(el){if(el&&el.__bf){el.__bf.forEach(p=>{el.style[p]=''});el.__bf=null}}
+function put(el,o){el.__bf=el.__bf||[];for(const k in o){el.style[k]=o[k];if(el.__bf.indexOf(k)<0)el.__bf.push(k)}}
+
+/* ---------- LOBBY ---------- */
+function layout(f,lean){
+ const L=$('#lobby');
+ const g={top:$('.topbar'),side:$('.sidemenu'),right:$('.right'),bot:$('.bottombar')};
+ for(const k in g)clr(g[k]);
+ L.classList.remove('bf-wrap','bf-stack','bf-lean');
+ if(lean)L.classList.add('bf-lean');
+ const W=innerWidth,H=innerHeight,I=insets(),M=4,portrait=W<=H;
+ let needLean=false;
+ void L.offsetWidth;
+ const tb=g.top,rt=g.right,bt=g.bot,sd=g.side;
+
+ /* barra superior: perfil + moedas + ferramentas */
+ if(shown(tb)){
+  const kids=[...tb.children].filter(shown);
+  const prof=tb.querySelector('.profile'),old=prof?prof.style.flex:'';
+  if(prof)prof.style.flex='none';
+  const gap=parseFloat(getComputedStyle(tb).columnGap)||0;
+  const nd=kids.reduce((s,c)=>s+c.offsetWidth,0)+gap*Math.max(0,kids.length-1);
+  if(prof)prof.style.flex=old;
+  const av=tb.clientWidth;
+  if(nd>av+1){
+   const z=fl(av/nd);
+   if(z>=.82)put(tb,{transform:'scale('+z+')',transformOrigin:'top left',width:(tb.getBoundingClientRect().width/z)+'px',right:'auto'});
+   else{L.classList.add('bf-wrap');void L.offsetWidth}
+  }
+ }
+ const topLim=shown(tb)?tb.getBoundingClientRect().bottom+6:I.t+6;
+
+ /* barra inferior (Cofre/Armas/...) x painel direito */
+ let rr=shown(rt)?rt.getBoundingClientRect():null,br=shown(bt)?bt.getBoundingClientRect():null;
+ if(!portrait&&rr&&br&&br.right+8>rr.left){L.classList.add('bf-stack');void L.offsetWidth;br=bt.getBoundingClientRect();rr=rt.getBoundingClientRect()}
+ if(br){
+  if(portrait){
+   const av=bt.clientWidth,nw=bt.scrollWidth;
+   if(nw>av+1){const z=Math.max(.72,fl(av/nw));put(bt,{transform:'scale('+z+')',transformOrigin:'bottom left',width:(br.width/z)+'px',right:'auto'})}
+  }else{
+   const lim=(rr&&br.right+8>rr.left)?rr.left-8:W-I.r-M;
+   if(br.right>lim+1){const z=Math.max(.72,fl((lim-br.left)/br.width));put(bt,{transform:'scale('+z+')',transformOrigin:'bottom left'})}
+  }
+  br=bt.getBoundingClientRect();
+ }
+
+ /* menu lateral */
+ if(shown(sd)){
+  const sr=sd.getBoundingClientRect();
+  let top=sr.top;
+  if(top<topLim){top=topLim;put(sd,{top:top+'px'})}
+  const bl=br?br.top-8:H-I.b-M;
+  const nh=sd.scrollHeight,av=bl-top;
+  let z=nh>av+1?Math.max(.62,fl(av/nh)):1;
+  z=Math.min(z,f);
+  if(z<.999)put(sd,{transform:'scale('+z+')',transformOrigin:'top left',height:nh+'px',bottom:'auto',overflow:'visible'});
+ }
+
+ /* painel direito (amigos, modo, mapa, COMEÇAR) */
+ if(shown(rt)){
+  const r=rt.getBoundingClientRect(),avH=r.bottom-topLim;
+  let z=r.height>avH+1?Math.max(.6,fl(avH/r.height)):1;
+  if(!lean&&z<.9)needLean=true;
+  z=Math.min(z,f);
+  if(z<.999){
+   const o={transform:'scale('+z+')',transformOrigin:'bottom right'};
+   if(portrait){o.width=(r.width/z)+'px';o.left='auto'}
+   put(rt,o);
+  }
+ }
+ return needLean;
+}
+function clash(){
+ const gs=[$('.topbar'),$('.sidemenu'),$('.right'),$('.bottombar')].filter(shown);
+ const R=gs.map(el=>[...el.children].filter(shown).map(c=>c.getBoundingClientRect()));
+ for(let i=0;i<R.length;i++)for(let j=i+1;j<R.length;j++)for(const a of R[i])for(const b of R[j])
+  if(a.left<b.right-1&&a.right>b.left+1&&a.top<b.bottom-1&&a.bottom>b.top+1)return true;
+ return false;
+}
+function fitLobby(){
+ const L=$('#lobby');
+ if(!L||!shown(L))return;
+ const tries=[[1,false],[1,true],[.92,true],[.84,true],[.76,true],[.68,true],[.6,true]];
+ for(const t of tries){
+  const nl=layout(t[0],t[1]);
+  if(nl&&!t[1])continue;
+  if(!clash())return;
+ }
+ layout(.6,true);
+}
+
+/* ---------- HUD DA PARTIDA ---------- */
+const HD=[
+ ['#btnF',100,1],['#btnA',99,1],['#btnJ',98,1],['#btnC',97,1],['#btnR',96,1],
+ ['.hud-b',90,1],['#btnP',80,0],['#btnCfg',79,0],['#mini',70,0],['.hud-tl',60,0],
+ ['#wpn',55,0],['#btnRun',50,0],['#btnE',45,0],['#btnS',40,0],['#lootBtn',30,0]
+];
+function custom(el){
+ const m=/translate\(\s*(-?[\d.]+)px\s*,\s*(-?[\d.]+)px\s*\)\s*scale\(\s*([\d.]+)\s*\)/.exec(el.style.transform||'');
+ return !!m&&(Math.abs(+m[1])>.5||Math.abs(+m[2])>.5||Math.abs(+m[3]-1)>.01);
+}
+function fitHud(){
+ const M=$('#match'),ed=$('#hudEd');
+ if(!shown(M)||(ed&&!ed.hidden))return;
+ const W=innerWidth,H=innerHeight,I=insets();
+ const B={l:I.l+2,t:I.t+2,r:W-I.r-2,b:H-I.b-2};
+ const els=HD.map(h=>$(h[0]));
+ els.forEach(el=>{if(el){el.style.translate='';el.style.scale=''}});
+ void M.offsetWidth;
+ const items=[];
+ HD.forEach((h,i)=>{
+  const el=els[i];if(!el)return;
+  const r=el.getBoundingClientRect();
+  if(r.width<2||r.height<2)return;
+  const o=getComputedStyle(el).transformOrigin.split(' ').map(parseFloat);
+  const ow=el.offsetWidth||r.width,oh=el.offsetHeight||r.height;
+  items.push({el:el,rank:h[1],fix:!!h[2],x:r.left,y:r.top,w:r.width,h:r.height,
+   ox:isNaN(o[0])?.5:o[0]/ow,oy:isNaN(o[1])?.5:o[1]/oh,dx:0,dy:0,sc:1,frozen:custom(el)});
+ });
+ bfSeparate(items,B,4);
+ items.forEach(it=>{
+  if(Math.abs(it.dx)>.4||Math.abs(it.dy)>.4)it.el.style.translate=it.dx+'px '+it.dy+'px';
+  if(it.sc<.999)it.el.style.scale=String(it.sc);
+ });
+}
+
+/* ---------- gatilhos ---------- */
+let raf=0,tm=0,busy=false,last=0;
+function run(){
+ if(busy)return;busy=true;
+ try{fitLobby()}catch(e){console.warn('bf-adapt lobby',e)}
+ try{fitHud()}catch(e){console.warn('bf-adapt hud',e)}
+ busy=false;last=Date.now();
+}
+function sched(d){clearTimeout(tm);tm=setTimeout(()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(run)},d==null?80:d)}
+addEventListener('resize',()=>sched());
+addEventListener('orientationchange',()=>{sched(120);setTimeout(()=>sched(0),500);setTimeout(()=>sched(0),1100)});
+if(window.visualViewport)visualViewport.addEventListener('resize',()=>sched());
+addEventListener('load',()=>sched(0));
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>sched(0));
+const mo=new MutationObserver(()=>{if(Date.now()-last<150)return;sched(120)});
+const lob=$('#lobby');
+if(lob)mo.observe(lob,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['hidden']});
+['#match','#hudEd','#lootBtn'].forEach(s=>{const e=$(s);if(e)mo.observe(e,{attributes:true,attributeFilter:['hidden']})});
+const rs=$('#hudReset');if(rs)rs.addEventListener('click',()=>sched(60));
+const bs=$('#bsz');if(bs)bs.addEventListener('input',()=>sched(150));
+sched(0);setTimeout(()=>sched(0),700);
+window.BFAdapt={refresh:()=>sched(0)};
 })();
 </script>
 </body></html>
