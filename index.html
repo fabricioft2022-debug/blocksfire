@@ -5,7 +5,7 @@
 #gTop .rd{padding:5px 10px;font-size:12px;letter-spacing:.1em;display:grid;place-items:center;color:#cfe0f5;white-space:nowrap}
 #gTop .dots{display:flex;gap:3px}#gTop .dots i{width:16px;height:6px;display:block}
 #gTop small{font-size:10px;letter-spacing:.14em;color:#cfe0f5;background:rgba(9,15,25,.7);padding:1px 8px;font-weight:700}
-#gShop .ovbox{width:min(640px,100%)}#gShop .card .muted{font-size:11px}
+#gShop .ovbox{width:min(640px,100%)}#gShopTm{font-family:var(--f-display);font-size:26px;letter-spacing:.05em;color:#ffd23f}#gShop .card .muted{font-size:11px}
 
 .rkic{display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.55))}.rkmini{display:inline-block;vertical-align:-3px;margin-right:3px}.rkmini .rkic{width:100%;height:100%}
 .pnr{display:flex;align-items:center;gap:4px;min-width:0}.pnr #pRank{display:inline-flex;flex:none}
@@ -453,7 +453,7 @@ input.txt{width:100%;max-width:300px;height:42px;background:#0f1724;color:var(--
   <div class="hudbtns"><button class="hud hbtn" id="btnF" aria-label="Atirar" title="Atirar" style="--ac:#ff6b6b"><svg viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(38 16 16)"><path class="f" d="M16 2.5c3.4 2.8 5 6 5 9.5v10h-10V12c0-3.500 1.600-6.700 5-9.500z"/><rect class="f" x="10" y="23.500" width="12" height="4" rx="1.200"/><path d="M13 16v4" class="k"/></g><path d="M4 9l3 2M3 15h3.500M8 4l2 3"/></svg><span class="bl">ATIRAR</span></button><button class="hud hbtn" id="btnA" aria-label="Mirar" title="Mirar" style="--ac:#7fd6ff"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="9"/><path d="M16 3v7M16 22v7M3 16h7M22 16h7"/><circle class="f" cx="16" cy="16" r="2.200"/></svg><span class="bl">MIRAR</span></button><button class="hud hbtn" id="btnJ" aria-label="Pular" title="Pular" style="--ac:#7dffae"><svg viewBox="0 0 32 32" aria-hidden="true"><circle class="f" cx="16" cy="6.500" r="3.200"/><path class="b" d="M16 12v8.500M16 14.500l-6.500-5.500M16 14.500l6.500-5.500M16 20.500l-4.500 7M16 20.500l4.500 7"/></svg><span class="bl">PULAR</span></button><button class="hud hbtn" id="btnC" aria-label="Agachar" title="Agachar" style="--ac:#ffd45a"><svg viewBox="0 0 32 32" aria-hidden="true"><circle class="f" cx="10.500" cy="8" r="3.200"/><path class="b" d="M11 13l4.500 6.500h7.500M23 19.500v7.500M12.500 15l8.500-3"/></svg><span class="bl">AGACHAR</span></button><button class="hud hbtn" id="btnR" aria-label="Recarregar" title="Recarregar" style="--ac:#ffffff"><svg viewBox="0 0 32 32" aria-hidden="true"><path class="b" d="M25.500 14a9.500 9.500 0 0 0-16.500-4.500M6.500 18a9.500 9.500 0 0 0 16.500 4.500"/><path class="f" d="M27 4.500v10h-10zM5 27.500v-10h10z"/></svg><span class="bl">RECARR.</span></button><button class="hud hbtn" id="btnS" aria-label="Trocar arma" title="Trocar arma" style="--ac:#ffffff"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 11h18l-4-4M26 21H8l4 4"/></svg><span class="bl">TROCAR</span></button><button class="hud hbtn" id="btnRun" aria-label="Correr" title="Correr" style="--ac:#8dff9b"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M18 5l-5 7 5 3-4 5-6 7M18 15l6 3 3 7M12 12l-5-1" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="bl">CORRER</span></button><button class="hud hbtn" id="btnE" aria-label="Emote" title="Emote" style="--ac:#ff9fe0"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.500"/><circle class="f" cx="11.700" cy="13.500" r="1.700"/><circle class="f" cx="20.300" cy="13.500" r="1.700"/><path d="M10.500 18.500c1.300 3.200 3 4.500 5.500 4.500s4.200-1.300 5.500-4.500z" class="f"/></svg><span class="bl">EMOTE</span></button></div>
   <div class="hud" id="wpn"><button class="wc wm em" data-k="0" aria-label="Arma equipada"><b class="wa"></b><span class="wn"></span><i class="wr"></i><canvas width="142" height="156"></canvas></button><div class="wsc"><button class="wc ws em" data-k="1" aria-label="Arma guardada 1"><b class="wa"></b><i class="wk">2</i><canvas width="104" height="75"></canvas></button><button class="wc ws em" data-k="2" aria-label="Arma guardada 2"><b class="wa"></b><i class="wk">3</i><canvas width="104" height="75"></canvas></button></div></div>
   <div class="hud hud-b"><div class="wline"><span id="wName">Pistola</span><span id="wAmmo">12/12</span></div><div class="mbar vb"><i id="shFill"></i><b id="vLbl">SEM COLETE</b></div><div class="mbar hp"><i id="hpTrail"></i><i id="hpFill"></i><b id="hpTxt">100</b></div></div>
-  <div id="banner"></div><div id="kmsg"></div><div id="gTop" hidden></div><div class="ov" id="gShop" hidden><div class="ovbox"><h2>Loja do Gladiador</h2><div class="muted" id="gShopSub"></div><div class="grid" id="gShopList"></div></div></div>
+  <div id="banner"></div><div id="kmsg"></div><div id="gTop" hidden></div><div class="ov" id="gShop" hidden><div class="ovbox"><h2>Loja do Gladiador</h2><div id="gShopTm"></div><div class="muted" id="gShopSub"></div><div class="grid" id="gShopList"></div></div></div>
   <div id="dmgL"></div><div id="dirI" aria-hidden="true"></div>
   <svg id="hitm" viewBox="0 0 40 40"><path d="M7 7l8 8M33 7l-8 8M7 33l8-8M33 33l-8-8"/></svg>
   <button class="btn pri" id="lootBtn" hidden>Saquear</button>
@@ -1376,7 +1376,7 @@ function offers(){
 }
 P.novidades={t:'Novidades',r:()=>`<div class="news"><h3>Versão 1.0 · Bem-vindo ao Blocks Fire</h3><ul>
  <li><b>Modos e equipes.</b> Escolha o modo (Normal, Gladiadores ou Ranqueado) e o tipo de equipe (Solo, Duo, Trio ou Squad). Normal e Ranqueado são Battle Royale com zona que fecha; Gladiadores é o Gladiadores Bloxfire: arena de guerra fechada, equipes Vermelha e Azul, 5 rounds e loja de armas alternada a cada 2 rounds.</li>
- <li><b>Gladiadores Bloxfire.</b> Vermelha contra Azul em uma arena de guerra fechada, 5 rounds. Um jogador escolhe a arma na loja e a vez troca a cada 2 rounds. O placar aparece no topo depois do round 2.</li>
+ <li><b>Gladiadores Bloxfire.</b> Vermelha contra Azul em uma arena de guerra fechada, 5 rounds. A cada 2 rounds uma equipe por vez escolhe a arma (só 1 jogador escolhe, em 10 segundos; sem escolha vale a arma padrão) e a arma vale para todos os jogadores. As equipes se alternam até todos terem escolhido. O placar aparece no topo depois do round 2.</li>
  <li><b>Online e equipes por código.</b> No Gladiadores Bloxfire, crie uma equipe em Equipe, passe o código de 5 letras para um amigo e iniciem juntos. Sem amigos, o jogo busca jogadores reais e completa com bots.</li>
  <li><b>Bots em todas as partidas.</b> Escolha Fácil, Normal ou Difícil ao lado do botão COMEÇAR.</li>
  <li><b>Menu Royale.</b> Gire a roleta: um giro grátis por dia, depois 30 diamantes.</li>
@@ -1840,32 +1840,47 @@ function startMatch(cfg){
 /* ================= Gladiadores Bloxfire ================= */
 const GN=['Vermelha','Azul'],GCOL=['#ff4d57','#3cc8ff'],GROUNDS=5,GMAX=100;
 const gTeam=t=>M.ents.filter(e=>e.team===t);
-const gHolder=(n,t)=>{const l=gTeam(t);return l[Math.floor((n-1)/2)%l.length]};
+const GPICK=10;/* segundos para escolher a arma */
+/* k = nº da escolha (0,1,2...): alterna Vermelha/Azul e, dentro de cada equipe, passa por todos os jogadores */
+const gPicker=k=>{const l=gTeam(k%2);return l[Math.floor(k/2)%l.length]};
+function gApplyAll(id){const R=M.rd;R.cw=id;R.applied=true;for(const e of M.ents)gGive(e,id)}
 function gGive(e,id){const lv=(e===M.p&&S.weapons.includes(id))?(S.evo[id]||0):0,m=e.bot?M.D.dmg:1+.08*lv;e.weap=id==='pistola'?[mkW('pistola',m)]:[mkW(id,m),mkW('pistola',e.bot?M.D.dmg:1)];e.slot=0;e.rel=0;e.cool=.25}
 function roundBegin(){
  const R=M.rd,W=M.W,spf=(t,i,s)=>[t?W-170:170,s<2?W/2:W/2-120+i*240/(s-1)];
  M.bullets=[];M.loot=[];M.parts=[];M.texts=[];M.lp=null;lootClose();M.cd=0;M.cdN=0;M.rec=0;camPP=0;camBl=0;lkY=lkP=0;
- for(const t of[0,1])gTeam(t).forEach((e,i)=>{const q=spf(t,i,gTeam(t).length);Object.assign(e,{x:q[0],y:q[1],lx:q[0],ly:q[1],hp:100,vl:0,vd:0,alive:true,deadT:0,target:null,dest:null,cool:0,rel:0,hitT:0,thinkT:0,stuckT:0,ang:t?Math.PI:0});e.ads=false;e.crouch=false;gGive(e,'pistola')});
+ for(const t of[0,1])gTeam(t).forEach((e,i)=>{const q=spf(t,i,gTeam(t).length);Object.assign(e,{x:q[0],y:q[1],lx:q[0],ly:q[1],hp:100,vl:0,vd:0,alive:true,deadT:0,target:null,dest:null,cool:0,rel:0,hitT:0,thinkT:0,stuckT:0,ang:t?Math.PI:0});e.ads=false;e.crouch=false;gGive(e,R.cw||'pistola')});
  M.cam.x=M.p.x;M.cam.y=M.p.y;
- R.state='shop';R.ft=0;R.humanPick=false;R.botT=2.2;
- for(const t of[0,1]){const h=gHolder(R.n,t);if(h===M.p)R.humanPick=true;else if(!h.net){const w=pick(WEAPONS.filter(x=>x.id!=='pistola'));gGive(h,w.id);addFeed(`<b style="color:${GCOL[t]}">${GN[t]}</b>: ${h.name} escolheu ${w.n}`)}}
- R.shopW=0;if(NET.on){NET.rp=R.humanPick?R.n-1:R.n;NET.afterRound()}
- const h0=gHolder(R.n,0),h1=gHolder(R.n,1);
- banner(`Round ${R.n}/${GROUNDS}`,2600,R.humanPick?'Sua vez na loja: escolha a arma · Você: '+GN[M.p.team]:`Loja desta rodada: ${h0.name} (Vermelha) e ${h1.name} (Azul)`);
+ R.state='shop';R.ft=0;R.humanPick=false;R.botT=2.2;R.shopW=0;R.ls=-1;R.applied=true;R.picker=null;R.pickT=GPICK;
+ const pr=R.n%2===1;/* a escolha acontece a cada 2 rounds (1, 3 e 5); nos rounds 2 e 4 vale a arma anterior */
+ if(pr){const h=gPicker((R.n-1)/2);R.picker=h;R.applied=false;
+  if(h===M.p)R.humanPick=true;
+  else if(!h.net){const w=pick(WEAPONS.filter(x=>x.id!=='pistola'));gApplyAll(w.id);addFeed(`<b style="color:${GCOL[h.team]}">${GN[h.team]}</b>: ${h.name} escolheu ${w.n} (vale para todos)`)}}
+ if(NET.on){NET.rp=R.humanPick?R.n-1:R.n;NET.afterRound()}
+ banner(`Round ${R.n}/${GROUNDS}`,2600,R.humanPick?`Sua vez de escolher a arma · ${GPICK}s`:pr?`${GN[R.picker.team]} escolhe a arma: ${R.picker.name}`:`Arma destes 2 rounds: ${weaponOf(R.cw||'pistola').n}`);
  if(R.humanPick)gShopOpen();
 }
 function gShopOpen(){
  try{document.exitPointerLock()}catch(_){}mouse.down=false;stick.L.on=stick.R.on=false;$('#sbL').hidden=$('#sbR').hidden=true;
  const R=M.rd;
- $('#gShopSub').textContent=`Round ${R.n} de ${GROUNDS} · você escolhe a arma da equipe ${GN[M.p.team]}. ${gTeam(M.p.team).length<2?'Você escolhe a arma em todos os rounds.':gTeam(M.p.team).length>2?'A vez de escolher troca a cada 2 rounds entre os jogadores da equipe.':R.n<=2?'No round 3 a loja passa para o seu aliado.':R.n<=4?'No round 5 a loja volta para você.':'Último round.'}`;
+ $('#gShopSub').textContent=`Round ${R.n} de ${GROUNDS} · sua vez de escolher pela equipe ${GN[M.p.team]}. A arma escolhida vale para TODOS os jogadores nos próximos 2 rounds. Se o tempo acabar (${GPICK}s), será usada a arma padrão: ${weaponOf('pistola').n}.`;R.ls=-1;{const tm=$('#gShopTm');if(tm)tm.textContent='Tempo: '+GPICK+'s'}
  $('#gShopList').innerHTML=WEAPONS.map(w=>`<div class="card" style="--rc:${w.bg}"><canvas data-weapon="${w.id}" width="240" height="130"></canvas><div class="cn">${w.n}</div><div class="muted">Dano ${w.dmg}${w.pel>1?' ×'+w.pel:''} · Carga ${w.mag} · Alcance ${w.rng}</div><button class="btn pri" data-gw="${w.id}">Escolher</button></div>`).join('');
  paintCanvases($('#gShopList'));$('#gShop').hidden=false;
 }
-function gPick(id){const R=M.rd;if(!R||R.state!=='shop'||!R.humanPick)return;R.humanPick=false;gGive(M.p,id);if(NET.on)NET.rp=R.n;$('#gShop').hidden=true;addFeed(`Você escolheu ${weaponOf(id).n}`);R.botT=.5;sfx.pick()}
+function gPick(id,auto){const R=M.rd;if(!R||R.state!=='shop'||!R.humanPick)return;R.humanPick=false;gApplyAll(id);if(NET.on)NET.rp=R.n;$('#gShop').hidden=true;const tc=`<b style="color:${GCOL[M.p.team]}">${GN[M.p.team]}</b>: `;addFeed(auto?`${tc}tempo esgotado · arma padrão: ${weaponOf(id).n}`:`${tc}você escolheu ${weaponOf(id).n} (vale para todos)`);R.botT=.5;if(!auto)sfx.pick()}
 $('#gShopList').addEventListener('click',e=>{const b=e.target.closest('[data-gw]');if(b&&M&&M.arena)gPick(b.dataset.gw)});
 function roundGate(dt){
  const R=M.rd;
- if(R.state==='shop'){if(!R.humanPick){R.botT-=dt;R.shopW=(R.shopW||0)+dt;if(R.botT<=0&&(!NET.on||NET.ready(R.n)||R.shopW>30)){R.state='cd';M.cd=3;M.cdN=0}}return true}
+ if(R.state==='shop'){R.shopW=(R.shopW||0)+dt;
+  if(!R.applied){
+   R.pickT-=dt;const sec=Math.max(0,Math.ceil(R.pickT));
+   if(R.humanPick){if(sec!==R.ls){R.ls=sec;const tm=$('#gShopTm');if(tm)tm.textContent='Tempo: '+sec+'s'}if(R.pickT<=0)gPick('pistola',true)}
+   else if(R.picker&&R.picker.net){
+    if(sec!==R.ls){R.ls=sec;banner(`Round ${R.n}/${GROUNDS}`,1300,`${GN[R.picker.team]} escolhendo a arma: ${R.picker.name} · ${sec}s`)}
+    const rd=NET.ready(R.n);
+    if(rd||R.shopW>GPICK+5){const pw=R.picker.weap&&R.picker.weap[R.picker.slot],id=rd&&pw?pw.w.id:'pistola';gApplyAll(id);addFeed(`<b style="color:${GCOL[R.picker.team]}">${GN[R.picker.team]}</b>: ${R.picker.name} ${rd?'escolheu':'ficou sem escolher · padrão:'} ${weaponOf(id).n}`)}}
+   else gApplyAll('pistola')}
+  if(!R.humanPick){R.botT-=dt;if(R.botT<=0&&R.applied&&(!NET.on||NET.ready(R.n)||R.shopW>30)){R.state='cd';M.cd=3;M.cdN=0}}
+  return true}
  if(R.state==='over'){R.t-=dt;if(R.t<=0){if(R.n>=GROUNDS)endMatch(M.score[M.p.team]>M.score[1-M.p.team],0);else{R.n++;roundBegin()}return true}}
  return false}
 function roundCheck(dt){
@@ -1925,7 +1940,7 @@ function wpnHud(){
  if(!M||M.over||M.paused||hedOn||c._i==null)return;
  if(c._i===M.p.slot){startReload(M.p);return}
  if(equipW(M.p,c._i))wpnHud()}))}
-function aimTarget(p,fc){
+function aimTarget(p,fc,assist){
  if(!p.alive||M.cd>0)return null;
  const s=p.weap[p.slot],rg=s?s.w.rng:500;fc=fc||ffCam(p.x,p.y,p.ang,!!p.ads,camPP);
  const o={x:fc.cx+fc.vx*fc.t0,y:fc.cy+fc.vy*fc.t0};let best=null,bd=1e9;
@@ -1933,7 +1948,7 @@ function aimTarget(p,fc){
   if(!e.alive||e.team===p.team)continue;
   const rx=e.x-fc.cx,ry=e.y-fc.cy,t=rx*fc.vx+ry*fc.vy;
   if(t<fc.t0-8)continue;
-  if(Math.abs(rx*fc.vy-ry*fc.vx)>e.r+4)continue;
+  if(Math.abs(rx*fc.vy-ry*fc.vx)>e.r+4+(assist?16:0))continue;/* assist: ao atirar perto do inimigo a mira é puxada para o corpo (como no Free Fire) */
   const d=dist(p,e);if(d>rg||d>=bd||!los(o,e))continue;
   best=e;bd=d;
  }
@@ -1961,7 +1976,7 @@ function tryFire(e){
  const s=e.weap[e.slot];if(!s||e.rel>0||e.cool>0)return;
  if(s.ammo<=0){startReload(e);return}
  const w=s.w;e.cool=w.rate/1000;s.ammo--;
- const isP=e===M.p,fc=isP?ffCam(e.x,e.y,e.ang,!!e.ads,camPP):null,cf=fc,tg=isP?aimTarget(e,fc):null;
+ const isP=e===M.p,fc=isP?ffCam(e.x,e.y,e.ang,!!e.ads,camPP):null,cf=fc,tg=isP?aimTarget(e,fc,true):null;
  const ox=fc?fc.cx+fc.vx*fc.t0:e.x+Math.cos(e.ang)*26,oy=fc?fc.cy+fc.vy*fc.t0:e.y+Math.sin(e.ang)*26;
  const base=fc?Math.atan2(fc.vy,fc.vx):e.ang;
  const lv=isP&&w.id===S.weapon?(S.evo[S.weapon]||0):0,gl=lv?EVC[lv]:(e.team===M.p.team?w.bg:'#ff5a3c');
@@ -1996,7 +2011,7 @@ function dirHit(src){if(!window.__bf3d)return;const n=performance.now();if(n-_dh
 function hitMark(head,kl){const h=$('#hitm');if(!h)return;h.classList.remove('on','hd','kl');void h.getBoundingClientRect();h.classList.add('on');if(head)h.classList.add('hd');if(kl)h.classList.add('kl');clearTimeout(hmT);hmT=setTimeout(()=>h.classList.remove('on','kl'),kl?260:130)}
 function bulletHit(b,e){
  const p=M.p,mine=b.own===p;let head=false;
- if(mine){const hh=(b.lock&&b.lock===e?b.hz:(b.cf?rayH(b.cf,b.x,b.y):26))-(e.jt>0?Math.sin((1-e.jt/.7)*Math.PI)*70:0);head=hh>=43&&hh<=66}else if(b.own&&b.own.bot&&!b.own.net)head=Math.random()<(b.own.sk||0)*.4;
+ if(mine){const hh=(b.lock&&b.lock===e?b.hz:(b.cf?rayH(b.cf,b.x,b.y):26))-(e.jt>0?Math.sin((1-e.jt/.7)*Math.PI)*70:0);head=hh>=41&&hh<=68}else if(b.own&&b.own.bot&&!b.own.net)head=Math.random()<(b.own.sk||0)*.4;
  e.hsK=head;const r=hurt(e,b.dmg*(head?HEAD_MULT:1),b.own);
  if(mine){
   sfx.hit();if(head)tone(1500,.08,'square',.05);hitMark(head,!e.alive);
