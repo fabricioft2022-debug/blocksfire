@@ -2140,6 +2140,7 @@ function botAI(b,dt){
  if(b.stuckT>.8){if(Math.hypot(b.x-b.lx,b.y-b.ly)<10&&(mx||my)){b.dest=freePos();b.strafe*=-1}b.lx=b.x;b.ly=b.y;b.stuckT=0}
 }
 function playerCtl(p,dt){
+ if(!isFinite(p.ang))p.ang=0;if(!isFinite(camPP))camPP=0;
  let f=0,r=0,fire=false;
  if(keys.w||keys.arrowup)f++;if(keys.s||keys.arrowdown)f--;if(keys.d)r++;if(keys.a)r--;
  if(keys.arrowleft)p.ang-=2.6*SN().k*dt;if(keys.arrowright)p.ang+=2.6*SN().k*dt;
@@ -2351,13 +2352,15 @@ inp.addEventListener('pointermove',e=>{
  if(e.pointerType==='mouse'){mouse.on=true;mouse.x=e.clientX;mouse.y=e.clientY;if(document.pointerLockElement===inp&&M&&!M.paused&&!M.over){M.p.ang+=(e.movementX||0)*.0032*SN().m*(M.p.ads?SN().a:1);camPP=Math.max(-.5,Math.min(.9,camPP-(e.movementY||0)*.0022*SN().m*(SN().v||1)*(SN().iy?-1:1)));camPT=performance.now()}return}
  for(const side of['L','R']){const s=stick[side];if(!s.on||s.id!==e.pointerId)continue;
   let dx=e.clientX-s.ox,dy=e.clientY-s.oy;const l=Math.hypot(dx,dy),m=Math.min(1,l/STR);
-  s.x=l?dx/l*m:0;s.y=l?dy/l*m:0;if(side==='R'&&M&&!M.paused&&!M.over){lkY+=(e.clientX-s.lx)*.0085*SN().t*(M.p.ads?SN().a:1);lkP-=(e.clientY-s.ly)*.0035*SN().t*(SN().v||1)*(M.p.ads?SN().a:1)*(SN().iy?-1:1);camPT=performance.now();s.lx=e.clientX;s.ly=e.clientY}$(side==='L'?'#sbL':'#sbR').firstElementChild.style.transform=`translate(${s.x*STR*.7}px,${s.y*STR*.7}px)`}
+  s.x=l?dx/l*m:0;s.y=l?dy/l*m:0;if(side==='R'&&M&&!M.paused&&!M.over){lkY+=(e.clientX-s.lx)*.0085*SN().t*(M.p.ads?SN().a:1);lkP-=(e.clientY-s.ly)*.0035*SN().t*(SN().v||1)*(M.p.ads?SN().a:1)*(SN().iy?-1:1);camPT=performance.now();s.lx=e.clientX;s.ly=e.clientY;if(!isFinite(lkY))lkY=0;if(!isFinite(lkP))lkP=0}$(side==='L'?'#sbL':'#sbR').firstElementChild.style.transform=`translate(${s.x*STR*.7}px,${s.y*STR*.7}px)`}
 });
 function endPtr(e){
  if(e.pointerType==='mouse'){mouse.down=false;return}
  for(const side of['L','R']){const s=stick[side];if(s.on&&s.id===e.pointerId){s.on=false;s.x=s.y=0;setBase(side,0,0,false)}}
 }
 inp.addEventListener('pointerup',endPtr);inp.addEventListener('pointercancel',endPtr);inp.addEventListener('lostpointercapture',endPtr);
+['touchstart','touchmove'].forEach(n=>inp.addEventListener(n,e=>{if(M&&!M.over&&e.cancelable)e.preventDefault()},{passive:false}));
+['gesturestart','gesturechange','gestureend'].forEach(n=>document.addEventListener(n,e=>{if(M&&!M.over)e.preventDefault()}));
 window.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')actP.add(e.pointerId)},true);
 ['pointerup','pointercancel'].forEach(n=>window.addEventListener(n,e=>{actP.delete(e.pointerId);if(e.pointerType!=='mouse')endPtr(e)},true));
 window.addEventListener('touchend',e=>{if(!e.touches.length)relAll()},{capture:true,passive:true});
@@ -2505,7 +2508,7 @@ let camPP=0,camPT=0,camBl=0,lkY=0,lkP=0;
 function ffCam(x,y,ang,ads,pp){const bl=camBl,dm=(S.sens&&S.sens.d)||1,D=(146-46*bl)*dm,sd=(32-12*bl)*(.6+.4*dm),L=500,p0=Math.atan2(31-(90-10*bl),460),pt=Math.max(-1.2,Math.min(.8,p0+pp)),ca=Math.cos(ang),sa=Math.sin(ang),hb=Math.cos(pt)*D;
  const cx=x-ca*hb-sa*sd,cy=y-sa*hb+ca*sd,dx=x+ca*L-cx,dy=y+sa*L-cy,l=Math.hypot(dx,dy)||1;
  return{cx,cy,H:Math.max(12,71-Math.sin(pt)*D),pt,vx:dx/l,vy:dy/l,t0:hb+26}}
-const SN=()=>S.sens||(S.sens={m:1,t:1,a:.8,k:1,v:1});
+const SN=()=>{const s=S.sens||(S.sens={}),d={m:1,t:1,a:.8,k:1,v:1};for(const k in d)if(typeof s[k]!=='number'||!isFinite(s[k])||s[k]<=0)s[k]=d[k];return s};
 {const eS=$('#sS'),eI=$('#sI');eS.value=SN().sm==null?.5:SN().sm;$('#sSv').textContent=Math.round(+eS.value*100)+'%';eS.addEventListener('input',e=>{SN().sm=+e.target.value;$('#sSv').textContent=Math.round(+e.target.value*100)+'%';save()});eI.checked=!!SN().iy;eI.addEventListener('change',e=>{SN().iy=e.target.checked;save()})}
 for(const[id,k]of[['sM','m'],['sT','t'],['sV','v'],['sA','a'],['sK','k'],['sD','d']]){const el=$('#'+id);el.value=SN()[k]||1;$('#'+id+'v').textContent=(+el.value).toFixed(2)+'x';el.addEventListener('input',e=>{SN()[k]=+e.target.value;$('#'+id+'v').textContent=(+e.target.value).toFixed(2)+'x';save()})}
 $('#gfxSel').value=S.gfx==null?1:S.gfx;$('#gfxSel').addEventListener('change',e=>{S.gfx=+e.target.value;save()});
