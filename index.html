@@ -3758,12 +3758,24 @@ Object.assign(NET,{
 </script>
 <script>
 (function(){
-const A=document.getElementById('adm'),B=document.getElementById('admB'),q=s=>A.querySelector(s);let pid='',rt=0;
+const A=document.getElementById('adm'),B=document.getElementById('admB'),q=s=>A.querySelector(s);let pid='',rt=0,ADM=null,ADB=null,admP=null;
+const FBV='11.10.0',FBU='https://www.gstatic.com/firebasejs/'+FBV+'/';
+const FBCFG={apiKey:'AIzaSyDbFK2peiaKkGCCIzATtu-4fbG8186ccCk',authDomain:'blocks-fire-online.firebaseapp.com',projectId:'blocks-fire-online',storageBucket:'blocks-fire-online.firebasestorage.app',messagingSenderId:'970976117534',appId:'1:970976117534:web:4b816ca2d5294b4dbd7f0f'};
+function adminInit(){if(admP)return admP;admP=(async()=>{let F,AU,FS;
+ try{F=await import(FBU+'firebase-app.js');AU=await import(FBU+'firebase-auth.js');FS=await import(FBU+'firebase-firestore.js')}
+ catch(e){const J='https://cdn.jsdelivr.net/npm/firebase@'+FBV+'/';F=await import(J+'app/+esm');AU=await import(J+'auth/+esm');FS=await import(J+'firestore/+esm')}
+ const app=F.getApps().find(a=>a.name==='admin')||F.initializeApp(FBCFG,'admin');
+ const auth=AU.getAuth(app);try{await AU.setPersistence(auth,AU.inMemoryPersistence)}catch(e){}
+ const db=FS.getFirestore(app),R=p=>FS.doc(db,...p.split('/'));
+ return{AU,auth,adb:{doc:p=>({get:async()=>{const s=await FS.getDoc(R(p));return{data:()=>s.exists()?s.data():null}},set:async o=>{await FS.setDoc(R(p),JSON.parse(JSON.stringify(o)))}})}}})();
+ admP.catch(()=>{admP=null});return admP}
+function out(){A.hidden=true;stop();const X=ADM;ADM=null;ADB=null;if(X)X.AU.signOut(X.auth).catch(()=>{})}
 function stop(){clearInterval(rt);rt=0}
 function rain(){stop();const c=document.getElementById('adR'),x=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;const f=16,n=Math.ceil(c.width/f),y=Array.from({length:n},()=>Math.random()*-40);x.fillStyle='#12081f';x.fillRect(0,0,c.width,c.height);
  rt=setInterval(()=>{x.fillStyle='rgba(18,8,31,.14)';x.fillRect(0,0,c.width,c.height);x.font=f+'px monospace';y.forEach((v,i)=>{x.fillStyle=Math.random()<.08?'#fff':'#a64dff';x.fillText(Math.random()<.5?'0':'1',i*f,v*f);y[i]=v*f>c.height&&Math.random()>.97?0:v+1})},60)}
 const opt=a=>a.map(x=>`<option value="${x.id}">${x.n||x.id}</option>`).join('');
-document.getElementById('admL').onclick=()=>{A.hidden=false;rain();B.innerHTML='<div style="margin-top:22vh"></div><h2>ADMIN</h2><input class="txt" id="aP" type="password" placeholder="Senha de admin" style="width:100%" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false"><div class="r"><button class="btn pri" id="aGo">Abrir</button><button class="btn" id="aX">Voltar</button></div><p class="muted" id="aM"></p>';q('#aX').onclick=()=>{A.hidden=true;stop()};const go=()=>{const v=q('#aP').value.replace(/[\s\u200b-\u200d\ufeff]/g,'').toUpperCase();if(v==='FABZ123')panel();else q('#aM').textContent='Senha errada'};q('#aGo').onclick=go;q('#aP').onkeydown=e=>{if(e.key==='Enter')go()}};
+document.getElementById('admL').onclick=()=>{A.hidden=false;rain();B.innerHTML='<div style="margin-top:22vh"></div><h2>ADMIN</h2><input class="txt" id="aE" type="email" placeholder="E-mail do admin" style="width:100%" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false"><input class="txt" id="aP" type="password" placeholder="Senha do admin" style="width:100%;margin-top:8px" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false"><div class="r"><button class="btn pri" id="aGo">Entrar</button><button class="btn" id="aX">Voltar</button></div><p class="muted" id="aM"></p>';q('#aX').onclick=out;
+const go=async()=>{const em=q('#aE').value.trim(),pw=q('#aP').value,m=q('#aM'),b=q('#aGo');if(!em||!pw){m.textContent='Digite e-mail e senha';return}b.disabled=true;m.textContent='Entrando…';try{const X=await adminInit();await X.AU.signInWithEmailAndPassword(X.auth,em,pw);ADM=X;ADB=X.adb;panel()}catch(e){const c=e&&e.code||'';m.textContent=(c==='auth/invalid-credential'||c==='auth/wrong-password'||c==='auth/user-not-found')?'E-mail ou senha incorretos':'Não foi possível entrar: '+(c||(e&&e.message)||e);b.disabled=false}};q('#aGo').onclick=go;q('#aP').onkeydown=e=>{if(e.key==='Enter')go()}};
 function panel(){stop();B.innerHTML=`<h2>ADMIN</h2><div class="r"><input class="txt" id="aI" inputmode="numeric" maxlength="6" placeholder="ID do jogador (6 números)"><button class="btn pri" id="aF">Buscar</button></div><p class="muted" id="aM"></p><div id="aT" hidden>
 <div class="r"><input class="txt" id="aG" type="number" placeholder="Diamantes (- para tirar)"><button class="btn" data-a="gems" data-i="aG">Aplicar</button></div>
 <div class="r"><input class="txt" id="aC" type="number" placeholder="Moedas (- para tirar)"><button class="btn" data-a="gold" data-i="aC">Aplicar</button></div>
@@ -3774,9 +3786,9 @@ function panel(){stop();B.innerHTML=`<h2>ADMIN</h2><div class="r"><input class="
 <div class="r"><button class="btn pri" data-a="verify" data-s="1">✔ Verificado</button><button class="btn" data-a="verify" data-s="0">Tirar verificado</button></div>
 <div class="r"><input class="txt" id="aB" placeholder="Motivo do banimento"><button class="btn danger" data-a="ban">Banir</button><button class="btn" data-a="unban">Desbanir</button></div></div>
 <h2 style="margin-top:18px">NOVIDADE</h2><div class="r"><input class="txt" id="aNT" maxlength="60" placeholder="Título da novidade"></div><div class="r"><input class="txt" id="aNX" maxlength="300" placeholder="Texto"><button class="btn pri" id="aNS">Enviar a todos</button></div><h2 style="margin-top:18px">ATUALIZAÇÃO OBRIGATÓRIA</h2><p class="muted" id="aUS">Verificando…</p><div class="r"><button class="btn danger" id="aUa">Ativar bloqueio</button><button class="btn pri" id="aUd">Desativar bloqueio</button></div><button class="btn" id="aX">Sair do admin</button>`;
-q('#aX').onclick=()=>A.hidden=true;const M=t=>q('#aM').textContent=t;
+q('#aX').onclick=out;const M=t=>q('#aM').textContent=t;
 const EM=e=>(e&&(e.code||e.message))||String(e);
-const dbReady=async()=>{const C=window.CL;if(!C.shared){if(!window.BF_fsDb)throw new Error('O online ainda não carregou. Espere alguns segundos.');C.db=await window.BF_fsDb();C.shared=true}return C};
+const dbReady=async()=>{if(!ADB)throw new Error('Entre como admin primeiro.');return{db:ADB}};
 const US=t=>{const e=q('#aUS');if(e)e.textContent=t};
 const lockShow=async()=>{try{const d=(await (await dbReady()).db.doc('adm/lock').get()).data();US(d&&d.on?'Bloqueio ATIVO: jogadores devem buscar a nova versão do APK no Discord oficial.':'Bloqueio desativado: o jogo está liberado.')}catch(e){US('Não foi possível ler o estado: '+EM(e))}};
 const lockSet=async on=>{try{await (await dbReady()).db.doc('adm/lock').set({on:on?1:0,ts:Date.now()});US(on?'Bloqueio ATIVO: jogadores devem buscar a nova versão do APK no Discord oficial. Chega em até 15s.':'Bloqueio desativado. O jogo volta a funcionar em até 15s.');if(window.BFLock)window.BFLock.check()}catch(e){US('Não foi possível salvar: '+EM(e))}};
@@ -3784,7 +3796,7 @@ q('#aUa').onclick=()=>lockSet(true);q('#aUd').onclick=()=>lockSet(false);lockSho
 q('#aNS').onclick=async()=>{const t=q('#aNT').value.trim().slice(0,60),x=q('#aNX').value.trim().slice(0,300);if(!t)return M('Digite o título');try{const ref=(await dbReady()).db.doc('adm/news'),d=(await ref.get()).data()||{n:0,items:[]};d.n=(d.n||0)+1;d.items=(d.items||[]).slice(-19).concat({n:d.n,title:t,text:x,ts:Date.now()});await ref.set(d);M('Novidade enviada! Chega em até 20s.');q('#aNT').value='';q('#aNX').value=''}catch(e){M('Não foi possível salvar: '+EM(e))}};
 q('#aF').onclick=async()=>{const v=q('#aI').value.trim();q('#aT').hidden=true;if(!/^\d{6}$/.test(v))return M('Digite o ID com 6 números');
  M('Buscando…');try{const C=await dbReady(),p=(await C.db.doc('ids/'+v).get()).data();if(!p)return M('ID não encontrado');const b=(await C.db.doc('adm/'+v).get()).data();pid=v;M('#'+v+' · '+p.name+' · Nível '+(p.level||1)+(b&&b.ban?' · BANIDO':'')+(b&&b.ver?' · VERIFICADO ✔':''));q('#aT').hidden=false}catch(e){M('Erro ao buscar: '+EM(e))}};
-q('#aT').onclick=async e=>{const b=e.target.closest('[data-a]');if(!b||!pid)return;const t=b.dataset.a,C=window.CL,ref=C.db.doc('adm/'+pid);let v=0,id='';
+q('#aT').onclick=async e=>{const b=e.target.closest('[data-a]');if(!b||!pid)return;const t=b.dataset.a,C={db:ADB},ref=C.db.doc('adm/'+pid);let v=0,id='';
  if(b.dataset.i){v=+q('#'+b.dataset.i).value;if(!v)return M('Digite um número')}
  if(t==='skin')id=q('#aS').value,v=+b.dataset.s;if(t==='weapon')id=q('#aW').value,v=+b.dataset.s;if(t==='rank')v=(+q('#aR').value||0)+1;
  try{const d=(await ref.get()).data()||{n:0,items:[]};
