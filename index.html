@@ -3430,7 +3430,7 @@ document.head.appendChild(st);
 /* ================= Equipes por código ================= */
 const TM={code:'',d:null,inv:null,busy:false,lastInv:0,lastK:0};
 const MM={on:false,starting:false,party:'',t0:0,seq:0,obs:{},token:0,baseK:0,lastK:0,inIdx:false};
-function tmSet(code,d){TM.code=code;TM.d=d;try{code?localStorage.setItem('bf.tm',code):localStorage.removeItem('bf.tm')}catch(e){}ui()}
+function tmSet(code,d){TM.code=code;TM.d=d;if(!code){TM.hbSeen={};TM.hbT=0}try{code?localStorage.setItem('bf.tm',code):localStorage.removeItem('bf.tm')}catch(e){}ui()}
 TM.isLeader=()=>!!(TM.d&&TM.d.leader===S.pid);
 TM.create=async()=>{
  if(!online())throw new Error('Entre com uma conta para criar equipe.');
@@ -3462,6 +3462,9 @@ TM.leave=async()=>{
  const c=TM.code;if(!c)return;MM.cancel(true);tmSet('',null);
  try{const d=await get('teams/'+c);
   if(d&&d.m){d.m=d.m.filter(x=>x.p!==S.pid);if(d.leader===S.pid)d.leader=d.m[0]?d.m[0].p:'';d.st='open';d.ts=Date.now();await set('teams/'+c,d)}}catch(e){}};
+TM.hbSeen={};TM.hbT=0;
+TM.end=async c=>{try{await set('teams/'+c,{code:c,leader:'',m:[],st:'open',ts:0,k:0,dead:1})}catch(e){}};
+addEventListener('pagehide',()=>{const c=TM.code;if(!c)return;try{localStorage.removeItem('bf.tm')}catch(e){}TM.end(c)});
 TM.start=async()=>{
  const d=await get('teams/'+TM.code);
  if(!d||!d.m||!d.m.some(x=>x.p===S.pid))throw new Error('Equipe não encontrada.');
@@ -3473,16 +3476,21 @@ async function reopen(){try{const d=await get('teams/'+TM.code);if(d&&d.st==='q'
 async function tmTick(){
  if(TM.busy||!online())return;TM.busy=true;
  try{
-  if(!TM.code){let sv='';try{sv=localStorage.getItem('bf.tm')||''}catch(e){}
-   if(sv){const d=await get('teams/'+sv);if(d&&d.m&&d.m.some(x=>x.p===S.pid)&&Date.now()-(d.ts||0)<TTL)tmSet(sv,d);else{try{localStorage.removeItem('bf.tm')}catch(e){}}}}
+  if(!TM.code){try{localStorage.removeItem('bf.tm')}catch(e){}}
   else{
    const d=await get('teams/'+TM.code);
-   if(!d||!d.m||!d.m.some(x=>x.p===S.pid)){tmSet('',null);MM.cancel(true);toast('Você não está mais na equipe.')}
+   if(!d||!d.m||!d.m.some(x=>x.p===S.pid)){const dead=!!(d&&d.dead);tmSet('',null);MM.cancel(true);toast(dead?'A equipe foi desfeita: um jogador saiu do jogo.':'Você não está mais na equipe.')}
    else{
     const old=TM.d,ch=!old||JSON.stringify(d.m)!==JSON.stringify(old.m)||d.leader!==old.leader||d.st!==old.st;TM.d=d;
     if(d.st==='q'&&!MM.on&&!MM.starting&&!NET.on&&!M&&d.k!==TM.lastK){TM.lastK=d.k;MM.start().catch(()=>{})}
     else if(d.st==='open'&&MM.on&&!TM.isLeader())MM.cancel(true);
-    if(ch)ui()}}
+    if(ch)ui();
+    if(Date.now()-(TM.hbT||0)>10000){TM.hbT=Date.now();
+     set('teams/'+TM.code+'_hb_'+S.pid,{ts:Date.now()}).catch(()=>{});
+     for(const x of d.m){if(x.p===S.pid)continue;
+      const h=await get('teams/'+TM.code+'_hb_'+x.p),sn=TM.hbSeen[x.p]||(TM.hbSeen[x.p]={v:-1,at:Date.now()});
+      if(h&&h.ts!==sn.v){sn.v=sn.v===-1?h.ts:h.ts;sn.at=Date.now();sn.ok=1}
+      if(sn.ok&&Date.now()-sn.at>60000){const c=TM.code;await TM.end(c);tmSet('',null);MM.cancel(true);toast('A equipe foi desfeita: um jogador saiu do jogo.');break}}}}}
   if(!M){const iv=await get('tinv/'+S.pid);
    if(iv&&iv.n&&iv.n!==TM.lastInv&&iv.code&&Date.now()-(iv.ts||0)<300000){TM.lastInv=iv.n;if(!TM.code){TM.inv=iv;showInv()}}}
  }catch(e){}
@@ -3661,9 +3669,9 @@ mBody.addEventListener('click',async e=>{
 Object.assign(NET,{
  begin(cfg){
   this.on=true;this.cfg=cfg;this.mid=cfg.mid;this.host=cfg.host;this.iHost=cfg.host===S.pid;this.pg=M;
-  this.sq=0;this.hn=0;this.sn=0;this.hits=[];this.shots=[];this.rp=0;this.rw=null;this.peers={};
+  this.sq=0;this.hn=0;this.sn=0;this.hits=[];this.shots=[];this.rp=0;this.rw=null;this.peers={};this.link=true;
   const now=performance.now();
-  cfg.slots.forEach(s=>{if(s.k==='h'&&s.p!==S.pid)this.peers[s.p]={sq:-9,last:now,rp:0,hs:0,ss:0,rn:-1,ents:null,dead:false,fresh:false}});
+  cfg.slots.forEach(s=>{if(s.k==='h'&&s.p!==S.pid)this.peers[s.p]={sq:-9,last:now,rp:0,hs:0,ss:0,rn:-1,ents:null,dead:false,fresh:false,idle:0,poll:now,bye:false}});
   const mid=this.mid;setTimeout(()=>this.loop(mid),60)},
  stop(){
   if(!this.on)return;this.on=false;
@@ -3671,22 +3679,27 @@ Object.assign(NET,{
  state(){
   const R=M.rd||{n:0},ents=[];
   for(const e of M.ents){if(e.net)continue;const w=e.weap[e.slot];
-   ents.push({i:e.id,x:Math.round(e.x*10)/10,y:Math.round(e.y*10)/10,a:Math.round(e.ang*1000)/1000,h:Math.round(e.hp*10)/10,vl:e.vl,vd:Math.round(e.vd*10)/10,al:e.alive?1:0,w:w?w.w.id:'',c:e.crouch?1:0,ad:e.ads?1:0,kb:e.kb||''})}
+   ents.push({i:e.id,x:Math.round(e.x*10)/10,y:Math.round(e.y*10)/10,a:Math.round(e.ang*1000)/1000,h:Math.round(e.hp*10)/10,vl:e.vl,vd:Math.round(e.vd*10)/10,al:e.alive?1:0,w:w?w.w.id:'',c:e.crouch?1:0,ad:e.ads?1:0,kb:e.kb||'',j:e.jt>0?Math.round(e.jt*100)/100:0,em:e.emote?e.emote.id:'',et:e.emote?Math.round((M.t-e.emote.t0)*100)/100:0})}
   return{sq:++this.sq,rn:R.n,rp:this.rp,rw:this.iHost?this.rw:null,ents,hits:this.hits,shots:this.shots}},
  async loop(mid){
   while(this.on&&this.mid===mid&&M&&M===this.pg){
    const t0=performance.now();
-   try{await set('mp/'+mid+'_'+S.pid,this.state())}catch(e){}
-   try{await Promise.all(Object.keys(this.peers).map(id=>this.read(id).catch(()=>{})))}catch(e){}
+   let up=true;
+   try{await set('mp/'+mid+'_'+S.pid,this.state())}catch(e){up=false}
+   this.link=up&&navigator.onLine!==false;
+   try{await Promise.all(Object.keys(this.peers).map(id=>this.read(id).catch(()=>{const q=this.peers[id];if(q)q.poll=performance.now()})))}catch(e){}
    if(!this.on||M!==this.pg)break;
    this.check();this.applyAll();
    await sleep(Math.max(40,240-(performance.now()-t0)))}},
  async read(pid){
   const p=this.peers[pid],d=await get('mp/'+this.mid+'_'+pid);
-  if(!d||!this.on||M!==this.pg||!M.rd)return;
-  if(d.bye){p.last=-1e9;return}
-  if(d.sq===p.sq)return;
-  p.sq=d.sq;p.last=performance.now();p.rp=d.rp||0;p.rn=d.rn;p.ents=d.ents||[];p.fresh=true;
+  if(!p||!this.on||M!==this.pg||!M.rd)return;
+  const now=performance.now(),gap=Math.min(now-p.poll,2000)*(this.link?1:.33);p.poll=now;
+  if(!d){p.idle+=gap;return}
+  if(d.bye){p.bye=true;return}
+  if(d.sq===p.sq){p.idle+=gap;return}
+  p.sq=d.sq;p.last=now;p.idle=0;if(p.dead)this.back(pid,p);
+  p.rp=d.rp||0;p.rn=d.rn;p.ents=d.ents||[];p.fresh=true;
   if(d.rw&&pid===this.host)this.rw=d.rw;
   const R=M.rd;
   for(const h of d.hits||[])if(h.n>p.hs){p.hs=h.n;
@@ -3700,10 +3713,14 @@ Object.assign(NET,{
  apply(s){
   const e=M.ents.find(q=>q.id===s.i);if(!e||!e.net||e.gone)return;
   e.tx=s.x;e.ty=s.y;e.ta=s.a;e.crouch=!!s.c;e.ads=!!s.ad;
+  if(s.j>0&&!(e.jt>0))e.jt=Math.min(.7,+s.j||.7);
+  if(s.em&&+s.et<2.8&&!e.emote&&EMOTES.some(o=>o.id===s.em))e.emote={id:s.em,t0:M.t-(+s.et||0)};
   if(s.w&&(!e.weap[e.slot]||e.weap[e.slot].w.id!==s.w)){e.weap=[mkW(s.w,1)];e.slot=0}
+  if(e.rv){e.rv=false;if(s.al){e.alive=true;e.hp=s.h;e.deadT=0}}
   if(e.alive){e.hp=s.h;e.vl=s.vl;e.vd=s.vd;
    if(!s.al){e.x=s.x;e.y=s.y;e.hp=0;kill(e,M.ents.find(q=>q.id===s.kb)||null)}}},
  step(e,dt){
+  if(e.jt>0)e.jt-=dt;
   if(!e.alive||e.tx==null)return;
   const dx=e.tx-e.x,dy=e.ty-e.y;
   if(Math.hypot(dx,dy)>300){e.x=e.tx;e.y=e.ty}else{const k=Math.min(1,dt*9);e.x+=dx*k;e.y+=dy*k}
@@ -3725,10 +3742,14 @@ Object.assign(NET,{
  ready(n){for(const id in this.peers){const p=this.peers[id];if(!p.dead&&p.rp<n)return false}return true},
  hostLost(){const h=this.peers[this.host];return !!(h&&h.dead)},
  check(){
-  const now=performance.now();
   for(const id in this.peers){const p=this.peers[id];if(p.dead)continue;
-   if(now-p.last>(p.sq===-9?25000:9000)){p.dead=true;
-    for(const e of M.ents)if(e.id===id||(id===this.host&&e.bot&&e.net)){e.gone=true;if(e.alive){e.alive=false;e.hp=0}addFeed(BFV.esc(e.name)+' saiu da partida')}}}},
+   if(p.bye||p.idle>(p.sq===-9?45000:16000))this.drop(id,p)}},
+ drop(id,p){
+  p.dead=true;
+  for(const e of M.ents)if(e.id===id||(id===this.host&&e.bot&&e.net)){e.gone=true;e.ga=e.alive;if(e.alive){e.alive=false;e.hp=0}if(!M.over)addFeed(BFV.esc(e.name)+' saiu da partida')}},
+ back(id,p){
+  if(p.bye)return;p.dead=false;p.idle=0;
+  for(const e of M.ents)if(e.gone&&(e.id===id||(id===this.host&&e.bot&&e.net))){e.gone=false;e.rv=!!e.ga;e.tx=e.x;e.ty=e.y;e.ta=e.ang;if(e.id===id&&!M.over)addFeed(BFV.esc(e.name)+' voltou à partida')}},
  afterRound(){for(const e of M.ents){if(e.gone){e.alive=false;e.hp=0}e.tx=e.x;e.ty=e.y;e.ta=e.ang}}
 });
 })();
@@ -3841,7 +3862,8 @@ q('#aT').onclick=async e=>{const b=e.target.closest('[data-a]');if(!b||!pid)retu
 }
 @media (max-height:470px) and (min-aspect-ratio:1/1){
  #lobby .right{width:226px;gap:5px}
- #myid,.modep .ver{display:none}
+ 
+ .modep .ver{display:none}
  .modep{padding:4px 6px;gap:4px}.modep .seg button{height:25px}.modep .mh b{font-size:13px}
  #lobby .go{height:46px;font-size:21px}
  #lobby .side{height:30px}#lobby .newsbtn{height:42px;font-size:13px}
@@ -3849,6 +3871,16 @@ q('#aT').onclick=async e=>{const b=e.target.closest('[data-a]');if(!b||!pid)retu
 }
 @media (max-height:340px) and (min-aspect-ratio:1/1){#lobby .sidemenu{width:auto}.lgo{font-size:min(5.4vw,10vh)}}
 @media (prefers-reduced-motion:reduce){.lgo,#lobby .go{animation:none}}
+</style>
+<style id="idfix">
+/* ID do jogador: sempre visível, sem cortes, em celulares pequenos */
+#lobby .friends{min-width:0;max-width:100%;box-sizing:border-box}
+#myid{display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px;min-width:0;max-width:100%;box-sizing:border-box;padding:8px 10px}
+#myid .pid{flex:0 0 auto;max-width:100%;font-size:clamp(17px,5.6vw,24px);line-height:1.1;white-space:nowrap}
+#myid .muted{flex:1 1 90px;min-width:0;font-size:11px;line-height:1.25;overflow-wrap:anywhere;word-break:break-word}
+@media (max-aspect-ratio:1/1){#lobby .right{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media (max-width:380px) and (max-aspect-ratio:1/1){#myid{padding:6px 8px;gap:0 6px;margin-bottom:8px}#myid .muted{flex-basis:100%;font-size:10px}}
+@media (max-height:470px) and (min-aspect-ratio:1/1){#myid{padding:3px 8px;gap:0 6px;margin-bottom:3px}#myid .pid{font-size:15px}#myid .muted{font-size:9px;flex-basis:auto}#frList{max-height:clamp(36px,12vh,56px)}}
 </style>
 <script>
 /* ===== LOBBY REMODELADO: painel de modo + cena 3D (com fallback para o fundo antigo) ===== */
