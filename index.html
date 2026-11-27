@@ -1454,12 +1454,17 @@ P.missoes={t:'Missões diárias',r(){checkDay();return MISSIONS.map(m=>{const v=
 P.passe={t:'Passe de Temporada',r(){
  const lvl=Math.min(PASS_N,Math.floor(S.passXp/PASS_XP)),into=S.passXp%PASS_XP;
  const readyN=[...Array(lvl)].filter((_,i)=>!S.passClaimed.includes(i+1)).length;
- let h=`<div class="row"><div class="grow"><div class="cn">Nível ${lvl} de ${PASS_N}</div><div class="prog"><i style="width:${lvl>=PASS_N?100:into}%"></i></div><div class="muted">${lvl>=PASS_N?'Passe completo':into+'/'+PASS_XP+' XP para o próximo nível'}</div></div>
- <button class="btn pri" data-act="claimAll" ${readyN?'':'disabled'}>Resgatar tudo (${readyN})</button></div><div class="passgrid">`;
+ let h=`<section class="passhero"><div class="passhero-copy"><span class="pass-kicker">TEMPORADA BLOXFIRE</span><h2>PASSE DE BATALHA</h2><p>Jogue, ganhe XP e desbloqueie recompensas até o nível 30!</p><div class="pass-level">NÍVEL <b>${lvl}</b><span>/ ${PASS_N}</span></div><div class="pass-progress"><i style="width:${lvl>=PASS_N?100:into}%"></i></div><small>${lvl>=PASS_N?'Passe completo':into+' / '+PASS_XP+' XP para o próximo nível'}</small></div><div class="passhero-art"><div class="pass-orbit"></div><div class="pass-spark s1">✦</div><div class="pass-spark s2">✧</div><canvas data-skin="azulcosmico" width="210" height="230"></canvas><div class="pass-season-tag">30 NÍVEIS</div></div></section>
+ <div class="pass-summary"><div><b>🎁 ${readyN}</b><span>recompensas disponíveis</span></div><button class="btn pri" data-act="claimAll" ${readyN?'':'disabled'}>Resgatar tudo</button></div>
+ <div class="pass-section-title"><div><h3>Trilha de recompensas</h3><p>Desbloqueie cada etapa jogando partidas</p></div><span>🏆 ${PASS_N} ETAPAS</span></div><div class="passgrid passgrid-premium">`;
  for(let t=1;t<=PASS_N;t++){const r=passReward(t),ok=t<=lvl,done=S.passClaimed.includes(t);
   const lab=r.type==='skin'?skinOf(r.id).n:r.type==='weapon'?weaponOf(r.id).n:r.type==='gold'?IC.coin+r.v:IC.gem+r.v;
-  h+=`<div class="tier ${done?'done':ok?'ready':''}"><b>${t}</b><span>${lab}</span>${done?'<span class="muted">Resgatado</span>':ok?`<button class="btn pri" data-act="claimP" data-id="${t}">Resgatar</button>`:'<span class="muted">Bloqueado</span>'}</div>`}
- return h+'</div>'}};
+  const art=r.type==='skin'?`<canvas data-skin="${r.id}" width="92" height="100"></canvas>`:r.type==='weapon'?`<div class="pass-reward-emoji weapon-art">⚔️</div>`:r.type==='gold'?`<div class="pass-reward-emoji gold-art">🪙</div>`:`<div class="pass-reward-emoji gem-art">💎</div>`;
+  h+=`<div class="tier pass-tier ${done?'done':ok?'ready':'locked'} ${t===30?'final-tier':''}"><div class="tier-top"><b>NÍVEL ${t}</b><span>${done?'✓':ok?'LIBERADO':'🔒'}</span></div><div class="pass-reward-art">${art}</div><strong>${lab}</strong>${done?'<span class="pass-tier-status">Resgatado</span>':ok?`<button class="btn pri" data-act="claimP" data-id="${t}">Resgatar</button>`:'<span class="pass-tier-status">Jogue para liberar</span>'}</div>`}
+ return h+`</div><style>
+ .passhero{position:relative;display:flex;align-items:center;justify-content:space-between;gap:14px;overflow:hidden;min-height:220px;padding:20px;margin:2px 0 16px;border:1px solid #4d6b9a;border-radius:16px;background:radial-gradient(circle at 78% 45%,#365c91 0,#1b3154 34%,#111c31 75%);box-shadow:inset 0 0 35px #6ba7ff22}.passhero:after{content:' ';position:absolute;inset:0;background:linear-gradient(115deg,transparent 45%,#7db9ff18);pointer-events:none}.passhero-copy{position:relative;z-index:2;max-width:58%}.pass-kicker{font-size:10px;letter-spacing:2px;color:#9ed5ff;font-weight:900}.passhero h2{font-size:clamp(22px,4vw,34px);line-height:1;margin:8px 0;color:#fff;text-shadow:0 3px 12px #0008}.passhero p{font-size:12px;color:#d5e5ff;line-height:1.45}.pass-level{font-size:12px;color:#b8d7ff;margin:12px 0 5px}.pass-level b{font-size:25px;color:#fff}.pass-progress{height:9px;border-radius:9px;background:#091426;overflow:hidden}.pass-progress i{display:block;height:100%;background:linear-gradient(90deg,#53c8ff,#b4edff);box-shadow:0 0 12px #5acaff}.passhero small{display:block;margin-top:5px;color:#c1d7f4}.passhero-art{position:relative;z-index:1;width:40%;min-width:125px;display:flex;justify-content:center;align-items:center}.passhero-art canvas{position:relative;z-index:2;max-width:100%;filter:drop-shadow(0 10px 12px #0009)}.pass-orbit{position:absolute;width:155px;height:155px;border:2px solid #9ddcff66;border-radius:50%;box-shadow:0 0 28px #57baff55,inset 0 0 22px #57baff33}.pass-spark{position:absolute;color:#d8f5ff;font-size:26px}.s1{top:0;right:8px}.s2{bottom:15px;left:0}.pass-season-tag{position:absolute;z-index:3;bottom:0;right:0;padding:5px 9px;border-radius:20px;background:#d8efff;color:#17345a;font-size:10px;font-weight:900}.pass-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;margin-bottom:18px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}.pass-summary div{display:flex;flex-direction:column;gap:3px}.pass-summary b{font-size:17px;color:var(--accent)}.pass-summary span{font-size:11px;color:var(--muted)}.pass-section-title{display:flex;justify-content:space-between;align-items:end;gap:8px;margin:8px 0 12px}.pass-section-title h3{margin:0;font-size:18px}.pass-section-title p{margin:3px 0 0;font-size:11px;color:var(--muted)}.pass-section-title>span{font-size:10px;color:#9ecfff;font-weight:900}.passgrid-premium{grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}.pass-tier{position:relative;min-height:175px;padding:10px 8px;border-radius:12px;border:1px solid #34465f;background:linear-gradient(160deg,#202f46,#121d2d);box-shadow:0 5px 12px #0002}.pass-tier.ready{border-color:#e6b84c;background:linear-gradient(160deg,#40351d,#202a37);box-shadow:0 0 14px #e6b84c22}.pass-tier.done{opacity:.65}.pass-tier.locked{filter:saturate(.65)}.tier-top{width:100%;display:flex;justify-content:space-between;align-items:center;color:#b9cde7;font-size:10px}.tier-top b{color:#f3d18a}.pass-reward-art{height:88px;width:100%;display:grid;place-items:center;margin:5px 0;background:radial-gradient(circle,#6386ae33,transparent 68%);border-radius:10px}.pass-reward-art canvas{height:88px;width:82px;object-fit:contain}.pass-reward-emoji{font-size:43px;filter:drop-shadow(0 5px 5px #0008)}.gold-art{color:#ffcf4d}.gem-art{color:#67dfff}.pass-tier strong{font-size:11px;min-height:26px;color:#fff}.pass-tier .btn{margin-top:3px}.pass-tier-status{font-size:10px;color:#aabbd0}.final-tier{border-color:#7acbff;background:linear-gradient(160deg,#244d70,#15263d)}
+ </style>`
+}};
 P.royale={t:'Menu Royale',r(){
  const free=S.royDay!==today();
  return`<div class="reelwrap"><div class="reel" id="reel">${Array.from({length:6},()=>rcHtml({type:'gold',v:100},'rc')).join('')}</div></div>
@@ -1478,7 +1483,7 @@ P.cofre={t:'Cofre',r(){
  return`<p class="muted">Cada skin que você compra libera o conjunto inteiro e também as peças separadas: camisa, calça, sapato, cabelo e maquiagem, exatamente como são na skin. Escolha a aba, toque na peça e monte o visual misturado. Você tem ${own.length} skins. Vale na próxima partida.</p><div class="center"><canvas data-skin="${S.skin}" data-me="1" width="180" height="198"></canvas></div>
  <div class="fitrow">${CSLOTS.map(([id,n])=>`<button class="btn ${cofreSlot===id?'pri':''}" data-act="cslot" data-id="${id}">${n}</button>`).join('')}</div>
  <div class="fitrow">${tiles.join('')}</div>
- <div class="fitrow"><button class="btn pri" data-act="cmix">Misturar tudo</button><button class="btn" data-act="cclear">Limpar visual</button></div>
+ <div class="fitrow"><button class="btn" data-act="cclear">Limpar visual</button></div>
  <h4 class="fht">Emotes</h4><div class="fitrow">${EMOTES.map(o=>`<button class="ob ${S.emote===o.id?'on':''}" data-act="emote" data-id="${o.id}"><canvas data-skin="${S.skin}" data-me="1" data-em="${o.id}" width="90" height="99"></canvas></button>`).join('')}</div>
  <style>.fitrow{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 12px}.ob{background:#1c2839;border:2px solid #2a3a52;padding:2px}.ob.on{border-color:#ffb400}.tl{display:flex;flex-direction:column;align-items:center;width:82px}.tl small{font-size:10px;color:#8fa3bf;max-width:78px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}</style>`}};
 P.perfil={t:'Perfil',r(){const s=S.stats;
@@ -1492,7 +1497,6 @@ modal.addEventListener('click',e=>{
  if(a==='emote'){S.emote=id;save();return renderPanel()}
   if(a==='cslot'){cofreSlot=id;return renderPanel()}
   if(a==='cclear'){S.fit={};save();return renderPanel()}
-  if(a==='cmix'){const own=SKINS.filter(x=>S.skins.includes(x.id));S.fit={mx:{}};['shirt','pants','shoes','hair','makeup'].forEach(sl=>{S.fit.mx[sl]=pick(own).id});sfx.ui();save();return renderPanel()}
   if(a==='fit'){const[k,v]=id.split('|');S.fit=S.fit||{};
    if(k.slice(0,3)==='mx.'){const sl=k.slice(3);S.fit.mx=Object.assign({},S.fit.mx||{});if(v==='x')delete S.fit.mx[sl];else S.fit.mx[sl]=v}
    save();return renderPanel()}
@@ -1591,7 +1595,7 @@ const keys={},mouse={x:0,y:0,down:false},stick={L:{on:false,id:null,ox:0,oy:0,x:
 const DIFF={facil:{dmg:.6,err:.22,sight:440,spd:150},normal:{dmg:.85,err:.13,sight:540,spd:170},dificil:{dmg:1,err:.07,sight:640,spd:185}};
 const mkW=(id,mult=1)=>{const w=weaponOf(id);return{w,mult,ammo:w.mag,res:w.mag*5}};
 function genObs(W,br){
- const T=[{k:'house',w:[260,380],h:[200,300]},{k:'crate',w:[42,60],h:[42,60],c:['#a8782f']},{k:'tree',w:[34,46],h:[34,46],c:['#2f8f47']},
+ const T=[{k:'house',w:[112,154],h:[92,132]},{k:'crate',w:[42,60],h:[42,60],c:['#a8782f']},{k:'tree',w:[34,46],h:[34,46],c:['#2f8f47']},
   {k:'wall',w:[170,300],h:[24,30],c:['#7d8794']},{k:'wall',w:[24,30],h:[150,260],c:['#7d8794']},
   {k:'rock',w:[40,70],h:[40,70],c:['#7c8794']},{k:'container',w:[120,150],h:[48,56],c:['#c0392b','#2c6fb5','#e0a820']},
   {k:'hill',w:[220,420],h:[220,420],c:['#4c9a4e','#5aa85a','#6b9f58']},{k:'pine',w:[34,48],h:[34,48],c:['#2f7a4a','#35874f']},{k:'barrel',w:[26,32],h:[26,32],c:['#8a5a2b','#b3442e']},
@@ -1599,9 +1603,9 @@ function genObs(W,br){
   {k:'tent',w:[60,80],h:[60,80],c:['#e0632a','#2c6fb5','#41a35a']},{k:'tower',w:[60,70],h:[60,70],c:['#9aa5b5']},
   {k:'lamp',w:[14,14],h:[14,14],c:['#2b2f3a']},{k:'fence',w:[150,260],h:[10,12],c:['#a8782f']}];
  const HC=['#8d6b4a','#7a5c8c','#5f7d95','#a05a4a'];
- const n=br?380:70,out=[],hz=[];let tries=0;
+ const n=br?430:70,out=[],hz=[];let tries=0;
  while(out.length<n&&tries<8000){tries++;
-  const t=br?pick(T.concat([T[2],T[2],T[1],T[0],T[0],T[0],T[5],T[7],T[7],T[8],T[8],T[8],T[8],T[9],T[9],T[10],T[11],T[12],T[12],T[13],T[14],T[14],T[15],T[15]])):pick(T.slice(1));
+  const t=br?pick(T.concat([T[2],T[2],T[1],T[0],T[0],T[0],T[0],T[0],T[5],T[7],T[7],T[8],T[8],T[8],T[8],T[9],T[9],T[10],T[11],T[12],T[12],T[13],T[14],T[14],T[15],T[15]])):pick(T.slice(1));
   const w=ri(t.w[0],t.w[1]),h=ri(t.h[0],t.h[1]),x=rnd(60,W-60-w),y=rnd(60,W-60-h);
   if(Math.hypot(x+w/2-W/2,y+h/2-W/2)+Math.hypot(w,h)/2>W/2-110)continue;
   if(br&&(x<W/2+90&&x+w>W/2-90||y<W/2+90&&y+h>W/2-90))continue;
@@ -1623,7 +1627,7 @@ function genIsland(W){
  const road=(x1,y1,x2,y2,w,t='d')=>roads.push({x1:C+x1,y1:C+y1,x2:C+x2,y2:C+y2,w,t});
  const cabin=(x,y,w,h,c='#76543a')=>{
   houses.push({x:C+x-w/2,y:C+y-h/2,w,h,c});
-  const t=15,g=62;
+  const t=12,g=52;
   out.push({x:C+x-w/2,y:C+y-h/2,w:(w-g)/2,h:t,k:'hwall',c},
    {x:C+x+(g/2),y:C+y-h/2,w:(w-g)/2,h:t,k:'hwall',c},
    {x:C+x-w/2,y:C+y+h/2-t,w,h:t,k:'hwall',c},
@@ -1648,19 +1652,19 @@ function genIsland(W){
  lakes.push({x:C-1700,y:C+1750,r:310},{x:C+1250,y:C+2850,r:230},{x:C+3000,y:C-250,r:150});
  // aldeia florestal
  deco.push({k:'plaza',x:C-2100,y:C-1750,r:170,c:'#9a8666'});
- cabin(-2100,-1850,220,170);cabin(-2350,-1580,180,145);cabin(-1820,-1550,190,150);
+ cabin(-2100,-1850,132,108);cabin(-2350,-1580,122,98);cabin(-1820,-1550,128,104);
  for(let i=0;i<18;i++){const a=i/18*TAU;tree(-2100+Math.cos(a)*330,-1750+Math.sin(a)*300,ri(38,58),Math.random()<.45)}
  // acampamento sob as copas
  deco.push({k:'fire',x:C+2100,y:C-2250});
  for(let i=0;i<5;i++){const a=i/5*TAU;deco.push({k:'log',x:C+2100+Math.cos(a)*62,y:C-2250+Math.sin(a)*62,a:a+1.57})}
  for(let i=0;i<4;i++)add('tent',C+1900+(i%2)*210,C-2450+Math.floor(i/2)*190,76,76,['#4c8b57','#b18a54','#6a8c9c','#9a6b58'][i]);
- cabin(2350,-2050,190,150);loot.push({x:C+2100,y:C-2250,type:'med'},{x:C+2350,y:C-2050,type:'ammo'});
+ cabin(2350,-2050,126,102);loot.push({x:C+2100,y:C-2250,type:'med'},{x:C+2350,y:C-2050,type:'ammo'});
  // ruínas cobertas de musgo
  deco.push({k:'steps',x:C-3300,y:C-650,w:260,h:250,c:'#777f69'});
  for(let i=0;i<10;i++){const a=i/10*TAU;add('pillar',C-3300+Math.cos(a)*250-17,C-650+Math.sin(a)*220-17,34,34,'#858b79')}
  for(let i=0;i<12;i++)rock(-3300+Math.cos(i/12*TAU)*340,-650+Math.sin(i/12*TAU)*300,ri(34,64));
  // posto dos guardas florestais
- cabin(3000,-250,260,190,'#6f583e');add('tower',C+3250-35,C-450-35,70,70,'#778b72');
+ cabin(3000,-250,146,116,'#6f583e');add('tower',C+3250-35,C-450-35,70,70,'#778b72');
  deco.push({k:'flag',x:C+3000,y:C-250,c:'#4d9659'});
  // bosque antigo e clareira florida: rochas e vegetação em anéis
  for(let i=0;i<26;i++){const a=i/26*TAU;tree(300+Math.cos(a)*430,-3500+Math.sin(a)*390,ri(42,68),i%3===0)}
@@ -2069,6 +2073,7 @@ function lootAll(){
 function moveEnt(e,dx,dy){
  e.x+=dx;e.y+=dy;
  for(const o of M.obs){
+  if(e.jt>0&&['rock','crate','barrel','hay'].includes(o.k))continue;
   if(e.x<o.x-e.r||e.x>o.x+o.w+e.r||e.y<o.y-e.r||e.y>o.y+o.h+e.r)continue;
   const nx=clamp(e.x,o.x,o.x+o.w),ny=clamp(e.y,o.y,o.y+o.h);let d=Math.hypot(e.x-nx,e.y-ny);
   if(d<e.r){
@@ -2965,9 +2970,15 @@ var RF=[];function reset0(){
   // fundação, piso e paredes com volumes definidos (sem colisores invisíveis no alto)
   bx(h.w+18,5,h.h+18,stone,cx,2.5,cz,r);bx(h.w,4,h.h,'#b98a5a',cx,6,cz,r);
   const floors=(hi%3===1||hi%4===0)?2:1,wallH= floors===2?34:27;
-  bx(h.w,wallH,h.h,dark,cx,8+wallH/2,cz,r);
-  // painéis de madeira e vigas aparentes
-  for(const side of[-1,1]){bx(7,wallH+3,h.h+5,light,cx+side*(h.w/2-5),8+wallH/2,cz,r);bx(h.w+5,6,7,light,cx,wallH+7,cz+side*(h.h/2-4),r)}
+  // paredes separadas para deixar a entrada realmente aberta; o interior fica visível ao entrar
+  const thick=7,doorW=Math.min(34,h.w*.32),half=(h.w-doorW)/2;
+  bx(h.w,wallH,thick,dark,cx,8+wallH/2,cz-h.h/2+thick/2,r);
+  bx(thick,wallH,h.h,dark,cx-h.w/2+thick/2,8+wallH/2,cz,r);
+  bx(thick,wallH,h.h,dark,cx+h.w/2-thick/2,8+wallH/2,cz,r);
+  bx(half,wallH,thick,dark,cx-doorW/2-half/2,8+wallH/2,cz+h.h/2-thick/2,r);
+  bx(half,wallH,thick,dark,cx+doorW/2+half/2,8+wallH/2,cz+h.h/2-thick/2,r);
+  // vigas e molduras visíveis, sem fechar o interior com um bloco maciço
+  for(const side of[-1,1]){bx(5,wallH+3,h.h+5,light,cx+side*(h.w/2-4),8+wallH/2,cz,r);bx(h.w+5,5,5,light,cx,wallH+6,cz-h.h/2+4,r)}
   // janelas grandes com moldura e vidro
   const win=(x,z)=>{bx(22,15,3,'#b8d9d0',x,19,z,r);bx(26,3,5,light,x,19,z,r);bx(3,18,6,light,x,19,z,r);bx(3,18,6,light,x+10,19,z,r)};
   win(cx-h.w*.27,cz-h.h/2-1);win(cx+h.w*.27,cz-h.h/2-1);win(cx-h.w*.27,cz+h.h/2+1);
@@ -2984,7 +2995,7 @@ var RF=[];function reset0(){
    win(cx-h.w*.27,cz-h.h/2-1);win(cx+h.w*.27,cz-h.h/2-1);
   }
   // telhado inclinado estilizado, mantido como geometria visível e sem hitbox
-  bx(h.w+24,5,h.h+24,dark,cx,floors===2?wallH*2+20:wallH+14,cz,r);bx(h.w*.72,7,h.h*.72,light,cx,floors===2?wallH*2+26:wallH+20,cz,r);
+  bx(h.w+24,5,h.h+24,dark,cx,floors===2?wallH*2+20:wallH+14,cz,r);bx(h.w*.72,4,7,light,cx,floors===2?wallH*2+26:wallH+20,cz-h.h*.34,r);bx(7,4,h.h*.72,light,cx-h.w*.34,floors===2?wallH*2+26:wallH+20,cz,r);
   bx(12,15,12,stone,cx+h.w*.29,floors===2?wallH*2+34:wallH+28,cz-h.h*.2,r);
   RF.push({m:r,x:h.x,y:h.y,w:h.w,h:h.h})}
  if(M.arena){ground.visible=sand.visible=sea.visible=false;arenaScene(W);return}
