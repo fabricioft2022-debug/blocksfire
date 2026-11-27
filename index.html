@@ -406,7 +406,7 @@ input.txt{width:100%;max-width:300px;height:42px;background:#0f1724;color:var(--
       <select id="modeSel" aria-label="Modo de jogo"><option value="normal">Normal</option><option value="glad">Gladiadores</option><option value="ranked">Ranqueado</option></select>
       <select id="teamSel" aria-label="Tipo de equipe"><option value="solo">Solo</option><option value="duo">Duo</option><option value="trio">Trio</option><option value="squad">Squad</option></select>
     </div>
-    <label class="map-pick" for="mapSel"><span>🗺️ MAPA DA PARTIDA</span><select id="mapSel"><option value="floresta">Floresta Verde</option><option value="deserto">Deserto Dourado</option><option value="cidade">Cidade Neon</option></select></label>
+    <label class="map-pick" for="mapSel"><span>🗺️ MAPA DA PARTIDA</span><select id="mapSel"><option value="floresta">Floresta Verde</option></select></label>
     <button class="go" id="goBtn"><span data-ic="rocket"></span>COMEÇAR</button>
     <div class="ver" id="modeDesc">BLOCKS FIRE v1.0</div>
   </aside>
@@ -1578,10 +1578,10 @@ skRw.addEventListener('click',e=>{const b=e.target.closest('[data-rw]');if(!b||!
 document.addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(!pcSel.hidden)bfBack();else if(!skRw.hidden&&rwId){rwId=null;bfBack()}});
 $('#sndBtn').addEventListener('click',()=>{S.sound=!S.sound;save();refreshCur();sfx.ui()});
 
-function syncSel(){S.mode=effMode();$('#modeSel').value=gmv();$('#teamSel').value=ttv();$('#mapSel').value=['floresta','deserto','cidade'].includes(S.mapTheme)?S.mapTheme:'floresta';$('#mapSel').disabled=gmv()==='glad';$('#modeDesc').textContent=modeText();$$('[data-ic]').forEach(e=>{e.innerHTML=IC[e.dataset.ic]});refreshCur()}
+function syncSel(){S.mode=effMode();$('#modeSel').value=gmv();$('#teamSel').value=ttv();S.mapTheme='floresta';$('#mapSel').value='floresta';$('#mapSel').disabled=gmv()==='glad';$('#modeDesc').textContent=modeText();$$('[data-ic]').forEach(e=>{e.innerHTML=IC[e.dataset.ic]});refreshCur()}
 $('#modeSel').addEventListener('change',e=>{S.gm=e.target.value;S.tt=ttv();save();syncSel()});
 $('#teamSel').addEventListener('change',e=>{S.tt=e.target.value;S.gm=gmv();save();syncSel()});
-$('#mapSel').addEventListener('change',e=>{S.mapTheme=e.target.value;save();syncSel()});
+$('#mapSel').addEventListener('change',()=>{S.mapTheme='floresta';save();syncSel()});
 
 /* ================= partida ================= */
 const game=$('#game'),gc=game.getContext('2d'),mini=$('#mini'),mc=mini.getContext('2d');
@@ -1618,191 +1618,72 @@ function genObs(W,br){
 }
 /* ================= Ilha Gigante (mapa normal e ranqueado) ================= */
 function genIsland(W){
- const C=W/2,R0=W*.47,out=[],hz=[],deco=[],roads=[],pois=[],lakes=[],loot=[];
- const CS=160,cells=new Map(),ck=(a,b)=>(a+10)*1024+(b+10);
- const reg=o=>{for(let a=Math.floor(o.x/CS);a<=Math.floor((o.x+o.w)/CS);a++)for(let b=Math.floor(o.y/CS);b<=Math.floor((o.y+o.h)/CS);b++){const k=ck(a,b);let l=cells.get(k);if(!l)cells.set(k,l=[]);l.push(o)}};
- const hit=(x,y,w,h,m)=>{for(let a=Math.floor((x-m)/CS);a<=Math.floor((x+w+m)/CS);a++)for(let b=Math.floor((y-m)/CS);b<=Math.floor((y+h+m)/CS);b++){const l=cells.get(ck(a,b));if(!l)continue;for(const o of l)if(x<o.x+o.w+m&&x+w+m>o.x&&y<o.y+o.h+m&&y+h+m>o.y)return true}return false};
- const dSeg=(px,py,s)=>{const dx=s.x2-s.x1,dy=s.y2-s.y1,l2=dx*dx+dy*dy||1,t=Math.max(0,Math.min(1,((px-s.x1)*dx+(py-s.y1)*dy)/l2));return Math.hypot(px-(s.x1+dx*t),py-(s.y1+dy*t))};
- const ok=(x,y,w,h,m,g)=>{const cx=x+w/2,cy=y+h/2,rr=Math.hypot(w,h)/2;
-  if(Math.hypot(cx-C,cy-C)+rr>R0-110)return false;
-  for(const s of roads)if(dSeg(cx,cy,s)<(s.av||s.w)/2+rr*.75+22)return false;
-  for(const l of lakes)if(Math.hypot(cx-l.x,cy-l.y)<l.r*1.15+rr+30)return false;
-  if(g)for(const p of pois)if(Math.hypot(cx-p.x,cy-p.y)<p.r+rr*.5)return false;
-  return !hit(x,y,w,h,m==null?46:m)};
- const rect=(k,cx,cy,w,h,c)=>{const o={x:C+cx-w/2,y:C+cy-h/2,w,h,k,c};out.push(o);reg(o);return o};
- const seg=(k,x1,y1,x2,y2,t,c)=>y1===y2?rect(k,(x1+x2)/2,y1,Math.abs(x2-x1),t,c):rect(k,x1,(y1+y2)/2,t,Math.abs(y2-y1),c);
- const HC=['#8d6b4a','#7a5c8c','#5f7d95','#a05a4a','#6f8f5a','#b08a4a','#8a6a7a','#4f7f8a'];
- const face=(cx,cy,fx,fy)=>{const dx=fx-cx,dy=fy-cy;return Math.abs(dy)>Math.abs(dx)?(dy>0?1:0):(dx>0?3:2)};
- const house=(cx,cy,w,h,col,side,gap,side2)=>{const x=C+cx-w/2,y=C+cy-h/2,th=16,g=gap||84;hz.push({x,y,w,h,c:col});reg({x,y,w,h});
-  for(let i=0;i<4;i++){const d=i===side||i===side2;
-   if(i<2){const wy=y+(i?h-th:0);if(d){out.push({x,y:wy,w:(w-g)/2,h:th,k:'hwall',c:col},{x:x+(w+g)/2,y:wy,w:(w-g)/2,h:th,k:'hwall',c:col})}else out.push({x,y:wy,w,h:th,k:'hwall',c:col})}
-   else{const wx=x+(i===3?w-th:0);if(d){out.push({x:wx,y,w:th,h:(h-g)/2,k:'hwall',c:col},{x:wx,y:y+(h+g)/2,w:th,h:(h-g)/2,k:'hwall',c:col})}else out.push({x:wx,y,w:th,h,k:'hwall',c:col})}}
-  return true};
- const houseT=(cx,cy,w,h,col,side,gap,g)=>ok(C+cx-w/2,C+cy-h/2,w,h,50,g)&&house(cx,cy,w,h,col,side,gap);
- const scat=(k,n,wr,hr,cols,cx,cy,rad,o)=>{o=o||{};let put=0;for(let t=0;t<n*30&&put<n;t++){const a=rnd(0,TAU),d=Math.sqrt(Math.random())*rad,x=cx+Math.cos(a)*d,y=cy+Math.sin(a)*d,w=ri(wr[0],wr[1]),h=hr?ri(hr[0],hr[1]):w;
-   if(o.keep&&d<o.keep)continue;if(!ok(C+x-w/2,C+y-h/2,w,h,o.m==null?30:o.m,o.g))continue;rect(k,x,y,w,h,pick(cols));put++}return put};
- const D=o=>{deco.push(o);return o};
- const LT=(cx,cy,type,lv)=>loot.push(lv?{x:C+cx,y:C+cy,type,lv}:{x:C+cx,y:C+cy,type});
- const road=(x1,y1,x2,y2,w,t,av)=>roads.push({x1:C+x1,y1:C+y1,x2:C+x2,y2:C+y2,w,t,av});
- const CC=['#c0392b','#2c6fb5','#e0a820','#41a35a','#e0632a','#7a5ca3'];
-
- /* ---- pontos de interesse: nome, x, y, raio ---- */
- const POIS=[['Vila Bloco',0,0,1300],['Fortaleza',-2350,-2150,560],['Acampamento Pinheiral',2350,-2450,820],['Porto Cúbico',2750,2500,640],['Fazenda Verde',-2900,650,780],
-  ['Pedreira',850,-3250,650],['Base Militar',3150,-450,540],['Praia Palmeira',-1150,3450,780],['Lago Azul',-1700,1700,680],['Ruínas Antigas',-3450,-1150,560],
-  ['Torre de Rádio',1650,-1350,330],['Posto 24h',-1050,-1900,360],['Fábrica',1000,2200,540]];
- for(const p of POIS)pois.push({n:p[0],x:C+p[1],y:C+p[2],r:p[3]});
-
- /* ---- estradas, lago e rio ---- */
- road(-W*.45,0,W*.45,0,120,'a');road(0,-W*.45,0,W*.45,120,'a');
- for(const[n,px,py,r]of POIS){if(n==='Vila Bloco'||n==='Lago Azul')continue;const d=Math.hypot(px,py),ux=px/d,uy=py/d;road(ux*340,uy*340,px-ux*r,py-uy*r,64,'d')}
- lakes.push({x:C-1700,y:C+1700,r:480});
- {const pts=[[-1982,2076],[-2250,2420],[-2400,2800],[-2750,3050],[-3100,3300],[-3500,3500]];for(let i=0;i<pts.length-1;i++)road(pts[i][0],pts[i][1],pts[i+1][0],pts[i+1][1],110,'r',210)}
-
- /* ---- Vila Bloco (praça central) ---- */
- {D({k:'plaza',x:C,y:C,r:330,c:'#cfc7b2'});rect('fountain',0,0,140,140,'#9fb3c8');
-  for(let i=0;i<10;i++){if(i===0||i===5)continue;const a=i/10*TAU,lx=Math.cos(a)*372,ly=Math.sin(a)*372;if(roads.every(s=>dSeg(C+lx,C+ly,s)>s.w/2+30))rect('lamp',lx,ly,14,14,'#2b2f3a')}
-  for(let i=0;i<16;i++){const a=i/16*TAU+.2,rd=790+(i%2)*60,cx=Math.cos(a)*rd,cy=Math.sin(a)*rd;houseT(cx,cy,ri(230,310),ri(190,250),pick(HC),face(cx,cy,0,0))}
-  for(let i=0;i<24;i++){const a=i/24*TAU+.1,rd=1130+(i%3)*55,cx=Math.cos(a)*rd,cy=Math.sin(a)*rd;houseT(cx,cy,ri(200,270),ri(170,220),pick(HC),face(cx,cy,0,0))}
-  scat('crate',6,[42,56],null,['#a8782f'],0,0,640,{keep:420,m:40});scat('barrel',6,[26,32],null,['#b3442e','#8a5a2b'],0,0,640,{keep:420,m:40});
-  LT(-210,-210,'med');LT(210,-210,'ammo');LT(-210,210,'vest',2);LT(210,210,'ammo')}
-
- /* ---- Fortaleza ---- */
- {const fx=-2350,fy=-2150,H=380,T=44,G=95,wc='#8c9099';
-  D({k:'pad',x:C+fx,y:C+fy,w:2*H,h:2*H,c:'#b0a690'});
-  seg('fwall',fx-H-T/2,fy-H,fx+H+T/2,fy-H,T,wc);seg('fwall',fx-H,fy-H-T/2,fx-H,fy+H+T/2,T,wc);
-  seg('fwall',fx-H-T/2,fy+H,fx-G,fy+H,T,wc);seg('fwall',fx+G,fy+H,fx+H+T/2,fy+H,T,wc);
-  seg('fwall',fx+H,fy-H-T/2,fx+H,fy-G,T,wc);seg('fwall',fx+H,fy+G,fx+H,fy+H+T/2,T,wc);
-  for(const sx of[-1,1])for(const sy of[-1,1])rect('turret',fx+sx*H,fy+sy*H,92,92,'#9aa0aa');
-  house(fx,fy-130,240,170,'#6b5a7a',1,100);house(fx-215,fy+150,190,130,'#7d6a52',0,84);
-  rect('crate',fx+170,fy+160,52,52,'#a8782f');rect('crate',fx+226,fy+160,52,52,'#a8782f');rect('crate',fx+198,fy+216,52,52,'#a8782f');
-  rect('barrel',fx+250,fy-80,28,28,'#b3442e');rect('barrel',fx+286,fy-80,28,28,'#8a5a2b');
-  rect('sbag',fx+130,fy+H-120,130,26,'#b89a5e');rect('sbag',fx-190,fy+H-120,110,26,'#b89a5e');rect('sbag',fx+H-120,fy+120,26,120,'#b89a5e');
-  D({k:'flag',x:C+fx+20,y:C+fy+60,c:'#e5323b'});
-  LT(fx,fy-130,'vest',3);LT(fx-215,fy+150,'vest',2);LT(fx+210,fy-200,'med');LT(fx,fy+250,'ammo');LT(fx-260,fy-270,'ammo')}
-
- /* ---- Acampamento Pinheiral ---- */
- {const kx=2350,ky=-2450;
-  D({k:'fire',x:C+kx,y:C+ky});for(let i=0;i<4;i++){const a=i/4*TAU+.4;D({k:'log',x:C+kx+Math.cos(a)*88,y:C+ky+Math.sin(a)*88,a:a+1.57})}
-  for(let i=0;i<5;i++){const a=i/5*TAU+.3;rect('tent',kx+Math.cos(a)*200,ky+Math.sin(a)*200,76,76,pick(['#e0632a','#2c6fb5','#41a35a','#c9a227','#9b59b6']))}
-  house(kx-430,ky-120,200,170,'#8a5a3a',face(kx-430,ky-120,kx,ky),84);house(kx+390,ky+290,180,150,'#7b5a3a',face(kx+390,ky+290,kx,ky),84);
-  scat('pine',120,[40,56],null,['#2f7a4a','#35874f','#2a6e40'],kx,ky,950,{keep:330,m:26});scat('tree',16,[34,46],null,['#2f8f47'],kx,ky,900,{keep:340});
-  scat('rock',8,[40,70],null,['#7c8794'],kx,ky,800,{keep:300});
-  LT(kx,ky+90,'med');LT(kx+60,ky-100,'ammo');LT(kx-430,ky-120,'vest',2);LT(kx+390,ky+290,'vest',2)}
-
- /* ---- Porto Cúbico ---- */
- {const ox=2750,oy=2500;
-  for(let r=0;r<3;r++)for(let c=0;c<4;c++){if(Math.random()<.22)continue;rect('container',ox-330+c*170,oy-230+r*190,150,56,pick(CC))}
-  for(let i=0;i<3;i++)rect('container',ox+470,oy-200+i*170,56,150,pick(CC));
-  house(ox-280,oy+360,360,230,'#5f7d95',0,140);house(ox+210,oy+360,300,210,'#7d8794',0,120);
-  rect('crane',ox+570,oy-250,100,64,'#e8b100');rect('crane',ox+570,oy+80,100,64,'#e8b100');
-  rect('truck',ox-540,oy-100,130,52,'#d94a3a');rect('truck',ox-540,oy+60,130,52,'#3a78d9');
-  scat('barrel',8,[26,30],null,['#b3442e','#8a5a2b'],ox,oy,600,{m:30});scat('crate',6,[42,56],null,['#a8782f'],ox,oy,600,{m:30});
-  D({k:'dock',x1:C+ox+250,y1:C+oy+230,x2:C+3500,y2:C+3190,w:70});
-  D({k:'boat',x:C+3800,y:C+3480,a:.5,c:'#e5323b'});D({k:'boat',x:C+3950,y:C+3200,a:-.3,c:'#2c6fb5'});
-  LT(ox-85,oy-135,'vest',3);LT(ox+85,oy+55,'ammo');LT(ox-280,oy+360,'vest',2);LT(ox+210,oy+360,'med');LT(ox-440,oy-135,'ammo')}
-
- /* ---- Fazenda Verde ---- */
- {const fx=-2900,fy=650;
-  D({k:'field',x:C+fx-360,y:C+fy-340,w:560,h:280,c:'#d9bb4e',rows:1});D({k:'field',x:C+fx-360,y:C+fy-20,w:560,h:280,c:'#7fbf4a',rows:1});
-  D({k:'pad',x:C+fx-100,y:C+fy+560,w:480,h:280,c:'#6fa84a'});
-  house(fx+120,fy-130,340,250,'#a8402f',3,150);house(fx+160,fy+210,220,170,'#c9a56a',3,84);
-  rect('silo',fx-125,fy-60,84,84,'#b9c2cc');rect('silo',fx-125,fy+50,84,84,'#b9c2cc');rect('windmill',fx+330,fy-390,80,80,'#e8e0d0');
-  seg('fence',fx-340,fy+420,fx-130,fy+420,12,'#a8782f');seg('fence',fx-70,fy+420,fx+140,fy+420,12,'#a8782f');seg('fence',fx-340,fy+700,fx+140,fy+700,12,'#a8782f');
-  seg('fence',fx-340,fy+420,fx-340,fy+700,12,'#a8782f');seg('fence',fx+140,fy+420,fx+140,fy+700,12,'#a8782f');
-  rect('hay',fx-250,fy+520,48,48,'#d9b84a');rect('hay',fx-190,fy+600,48,48,'#d9b84a');rect('hay',fx+60,fy+520,48,48,'#d9b84a');
-  rect('truck',fx+60,fy+600,120,52,'#3aa04a');
-  scat('hay',8,[40,56],null,['#d9b84a'],fx+60,fy+130,420,{m:30});
-  LT(fx+120,fy-130,'vest',2);LT(fx+160,fy+210,'med');LT(fx+100,fy+60,'ammo');LT(fx-120,fy+560,'ammo')}
-
- /* ---- Pedreira ---- */
- {const qx=850,qy=-3250;
-  D({k:'quarry',x:C+qx,y:C+qy+60,w:560,h:520,c:'#cdb98a'});
-  rect('hill',qx,qy-330,640,300,'#9a8f7a');rect('hill',qx-440,qy-40,300,480,'#8a8f98');rect('hill',qx+450,qy-60,300,420,'#9a8f7a');
-  house(qx-130,qy+170,200,150,'#8d8f95',face(qx-130,qy+170,0,0),84);
-  rect('truck',qx-100,qy-30,130,52,'#e8b100');rect('truck',qx+120,qy+60,130,52,'#d94a3a');rect('container',qx+130,qy+240,150,56,'#c0392b');rect('tower',qx+200,qy-120,70,70,'#9aa5b5');
-  scat('rock',9,[70,120],null,['#7c8794','#8a96a8'],qx,qy+40,300,{m:24});scat('crate',6,[42,56],null,['#a8782f'],qx,qy+40,300,{m:30});scat('barrel',8,[26,30],null,['#b3442e','#8a5a2b'],qx,qy+40,300,{m:30});
-  LT(qx,qy-100,'vest',3);LT(qx-130,qy+170,'vest',2);LT(qx+120,qy+150,'med');LT(qx-20,qy+80,'ammo')}
-
- /* ---- Base Militar ---- */
- {const bx_=3150,by=-450,fx=350,fz=260,t=12,fc='#7d8794';
-  D({k:'pad',x:C+bx_,y:C+by,w:2*fx,h:2*fz,c:'#8a9078'});
-  seg('fence',bx_-fx,by-fz,bx_+fx,by-fz,t,fc);seg('fence',bx_+fx,by-fz,bx_+fx,by+fz,t,fc);
-  seg('fence',bx_-fx,by-fz,bx_-fx,by-70,t,fc);seg('fence',bx_-fx,by+70,bx_-fx,by+fz,t,fc);
-  seg('fence',bx_-fx,by+fz,bx_-70,by+fz,t,fc);seg('fence',bx_+70,by+fz,bx_+fx,by+fz,t,fc);
-  house(bx_+60,by-110,300,200,'#6d7a6a',2,100);
-  rect('tent',bx_-230,by-160,80,80,'#41a35a');rect('tent',bx_-230,by-50,80,80,'#41a35a');
-  rect('tank',bx_+170,by+160,150,84,'#5a6b4a');rect('tank',bx_-60,by+170,150,84,'#5a6b4a');
-  rect('tower',bx_+330,by-235,66,66,'#9aa5b5');rect('tower',bx_-330,by+235,66,66,'#9aa5b5');
-  rect('sbag',bx_-290,by-130,26,100,'#b89a5e');rect('sbag',bx_-290,by+60,26,100,'#b89a5e');rect('container',bx_+270,by+40,56,150,'#2c6fb5');
-  rect('barrier',bx_-150,by+20,120,30,'#b5b9c1');rect('barrel',bx_+250,by-190,28,28,'#b3442e');rect('barrel',bx_+286,by-190,28,28,'#8a5a2b');
-  D({k:'helipad',x:C+bx_,y:C+by+400,r:90});
-  LT(bx_+60,by-110,'vest',3);LT(bx_-100,by+90,'vest',2);LT(bx_+100,by+30,'ammo');LT(bx_-170,by-100,'ammo');LT(bx_+270,by-120,'med')}
-
- /* ---- Praia Palmeira ---- */
- {const px=-1150,py=3450;
-  D({k:'sand',x:C+px,y:C+py,r:700,c:'#ecd9a0'});
-  const HU=['#d95f5f','#3fa7d6','#f0b43a','#58b368','#b768d9','#e07a3a'];for(let i=0;i<6;i++)house(px-500+i*200,py-200+(i%2)*80,150,130,HU[i],0,70);
-  rect('tower',px,py+170,70,70,'#e8a33a');rect('tent',px-330,py+250,70,70,'#e0632a');rect('tent',px+300,py+230,70,70,'#2c6fb5');
-  scat('palm',28,[22,26],null,['#8a6a3a'],px,py,700,{keep:110,m:30});
-  for(let i=0;i<9;i++){const a=rnd(0,TAU),d=rnd(150,600);D({k:'umbrella',x:C+px+Math.cos(a)*d,y:C+py+90+Math.abs(Math.sin(a))*d*.6,c:pick(['#e5323b','#ffd34d','#3cc8ff','#ff8a1f','#ffffff'])})}
-  D({k:'net',x:C+px+330,y:C+py+60});D({k:'boat',x:C+px-150,y:C+4900,a:.2,c:'#ffd34d'});
-  LT(px-300,py+20,'ammo');LT(px+100,py+10,'med');LT(px,py+250,'vest',2);LT(px+400,py+20,'ammo')}
-
- /* ---- Lago Azul ---- */
- {const lx=-1700,ly=1700;
-  rect('rock',lx,ly,70,60,'#7c8794');rect('palm',lx+50,ly-30,24,24,'#8a6a3a');rect('palm',lx-40,ly+25,24,24,'#8a6a3a');
-  D({k:'dock',x1:C+lx+330,y1:C+ly-40,x2:C+lx+570,y2:C+ly-40,w:50});D({k:'boat',x:C+lx-130,y:C+ly+140,a:.6,c:'#ffffff'});D({k:'boat',x:C+lx+160,y:C+ly-190,a:-.4,c:'#e5323b'});
-  house(lx+740,ly-210,190,150,'#8a5a3a',2,84);house(lx+720,ly+240,170,140,'#7b5a3a',2,84);
-  scat('tree',24,[34,48],null,['#2f8f47'],lx,ly,980,{keep:560,m:30});scat('pine',10,[36,50],null,['#2f7a4a'],lx,ly,980,{keep:580,m:30});
-  LT(lx+740,ly-210,'vest',2);LT(lx+720,ly+240,'ammo');LT(lx+620,ly,'med')}
-
- /* ---- Ruínas Antigas ---- */
- {const ux=-3450,uy=-1150;
-  D({k:'steps',x:C+ux,y:C+uy,w:300,h:300,c:'#b9b2a0'});rect('statue',ux,uy,60,60,'#d9c88a');
-  for(let i=0;i<12;i++){if(i%4===0)continue;const a=i/12*TAU;rect('pillar',ux+Math.cos(a)*330,uy+Math.sin(a)*330,34,34,'#c9c3b2')}
-  seg('wall',ux-500,uy-130,ux-340,uy-130,26,'#a9a393');seg('wall',ux+360,uy+140,ux+520,uy+140,26,'#a9a393');seg('wall',ux-130,uy+480,ux-130,uy+360,26,'#a9a393');seg('wall',ux+150,uy-480,ux+150,uy-370,26,'#a9a393');
-  scat('rock',8,[60,100],null,['#8a8a80','#9a9a8a'],ux,uy,520,{keep:380});scat('pillar',8,[30,34],null,['#c9c3b2'],ux,uy,500,{keep:380});scat('tree',10,[34,46],null,['#2f8f47'],ux,uy,540,{keep:380});
-  LT(ux,uy+110,'vest',3);LT(ux+120,uy-100,'med');LT(ux-120,uy-80,'ammo');LT(ux-30,uy-120,'ammo')}
-
- /* ---- Torre de Rádio ---- */
- {const ax=1650,ay=-1350,t=10,hx=170,hz2=150,fc='#7d8794';
-  D({k:'pad',x:C+ax,y:C+ay,w:2*hx,h:2*hz2,c:'#9aa0a8'});rect('mast',ax,ay-10,44,44,'#c9ced6');
-  seg('fence',ax-hx,ay-hz2,ax+hx,ay-hz2,t,fc);seg('fence',ax-hx,ay-hz2,ax-hx,ay+hz2,t,fc);seg('fence',ax+hx,ay-hz2,ax+hx,ay+hz2,t,fc);seg('fence',ax-hx,ay+hz2,ax-50,ay+hz2,t,fc);seg('fence',ax+50,ay+hz2,ax+hx,ay+hz2,t,fc);
-  house(ax-80,ay+75,130,100,'#7d8794',1,70);rect('container',ax+95,ay+70,56,110,'#c0392b');rect('barrel',ax+90,ay-90,28,28,'#b3442e');
-  LT(ax-80,ay+75,'vest',3);LT(ax+60,ay-80,'ammo');LT(ax,ay+210,'med')}
-
- /* ---- Posto 24h ---- */
- {const px=-1050,py=-1900;
-  house(px,py,260,170,'#d94a3a',1,100);D({k:'canopy',x:C+px,y:C+py+250,w:320,h:120});
-  for(const sx of[-1,1])for(const sz of[-1,1])rect('pillar',px+sx*150,py+250+sz*50,18,18,'#e5e5e5');
-  for(let i=0;i<4;i++)rect('barrel',px-60+(i%2)*120,py+230+Math.floor(i/2)*40,26,26,'#e5323b');
-  rect('truck',px-270,py+90,130,52,'#3a78d9');rect('truck',px-270,py-30,130,52,'#e8b100');rect('tank',px+270,py+60,150,84,'#8a96a8');
-  LT(px,py,'vest',2);LT(px-140,py+250,'ammo');LT(px+60,py+330,'med')}
-
- /* ---- Fábrica ---- */
- {const fx=1000,fy=2200;
-  house(fx-230,fy-60,380,240,'#6d7580',0,140);house(fx+210,fy-30,320,210,'#7b6a5c',0,120);
-  for(let i=0;i<3;i++)rect('silo',fx-110+i*100,fy+170,84,84,'#b9c2cc');rect('chimney',fx+60,fy-250,50,50,'#8d6b5a');
-  for(let i=0;i<4;i++)rect('container',fx-300+i*165,fy+330,150,56,pick(CC));
-  rect('tank',fx+340,fy+240,150,84,'#6b7a8a');rect('tank',fx+340,fy+350,150,84,'#6b7a8a');rect('truck',fx-420,fy+120,130,52,'#d94a3a');rect('truck',fx-420,fy+240,130,52,'#f4f7fb');
-  scat('barrel',8,[26,30],null,['#b3442e','#8a5a2b'],fx,fy,480,{m:30});
-  LT(fx-230,fy-60,'vest',3);LT(fx+210,fy-30,'vest',2);LT(fx+200,fy+170,'med');LT(fx-40,fy+280,'ammo')}
-
- /* ---- casas isoladas, bosques e cenário espalhado ---- */
- for(let n=0,t=0;n<26&&t<600;t++){const a=rnd(0,TAU),d=Math.sqrt(Math.random())*(R0-300),cx=Math.cos(a)*d,cy=Math.sin(a)*d;if(houseT(cx,cy,ri(200,300),ri(170,240),pick(HC),ri(0,3),84,true))n++}
- for(let gI=0,t=0;gI<12&&t<200;t++){const a=rnd(0,TAU),d=rnd(500,R0-700),cx=Math.cos(a)*d,cy=Math.sin(a)*d;
-  if(pois.some(p=>Math.hypot(C+cx-p.x,C+cy-p.y)<p.r+330)||lakes.some(l=>Math.hypot(C+cx-l.x,C+cy-l.y)<l.r+330))continue;
-  scat(Math.random()<.5?'tree':'pine',22,[36,50],null,['#2f8f47','#35874f','#2f7a4a'],cx,cy,rnd(280,420),{m:26});gI++}
- const GL=(k,n,wr,hr,cols,m)=>scat(k,n,wr,hr,cols,0,0,R0-150,{m,g:true});
- GL('hill',34,[220,420],null,['#4c9a4e','#5aa85a','#6b9f58'],60);
- GL('tree',200,[34,46],null,['#2f8f47'],30);GL('pine',110,[34,48],null,['#2f7a4a','#35874f'],30);GL('rock',70,[40,70],null,['#7c8794','#8a96a8'],30);
- GL('crate',40,[42,60],null,['#a8782f'],40);GL('barrel',50,[26,32],null,['#8a5a2b','#b3442e'],40);GL('hay',24,[40,56],null,['#d9b84a'],40);
- GL('wall',24,[170,300],[24,30],['#7d8794'],50);GL('wall',22,[24,30],[150,260],['#7d8794'],50);
- GL('container',26,[120,150],[48,56],['#c0392b','#2c6fb5','#e0a820'],50);GL('truck',16,[110,140],[48,56],['#d94a3a','#3a78d9','#e8b100','#f4f7fb'],50);
- GL('tent',14,[60,80],null,['#e0632a','#2c6fb5','#41a35a'],40);
- GL('tower',8,[60,70],null,['#9aa5b5'],50);GL('lamp',20,[14,14],null,['#2b2f3a'],30);GL('fence',18,[150,260],[10,12],['#a8782f'],40);
- out.houses=hz;out.deco=deco;out.roads=roads;out.pois=pois;out.lakes=lakes;
- out.loot=loot.filter(l=>!out.some(r=>l.x>r.x-14&&l.x<r.x+r.w+14&&l.y>r.y-14&&l.y<r.y+r.h+14));return out}
+ const C=W/2,R0=W*.47,out=[],houses=[],deco=[],roads=[],pois=[],lakes=[],loot=[];
+ const add=(k,x,y,w,h,c)=>out.push({k,x,y,w,h,c});
+ const road=(x1,y1,x2,y2,w,t='d')=>roads.push({x1:C+x1,y1:C+y1,x2:C+x2,y2:C+y2,w,t});
+ const cabin=(x,y,w,h,c='#76543a')=>{
+  houses.push({x:C+x-w/2,y:C+y-h/2,w,h,c});
+  const t=15,g=62;
+  out.push({x:C+x-w/2,y:C+y-h/2,w:(w-g)/2,h:t,k:'hwall',c},
+   {x:C+x+(g/2),y:C+y-h/2,w:(w-g)/2,h:t,k:'hwall',c},
+   {x:C+x-w/2,y:C+y+h/2-t,w,h:t,k:'hwall',c},
+   {x:C+x-w/2,y:C+y-h/2,w:t,h,k:'hwall',c},
+   {x:C+x+w/2-t,y:C+y-h/2,w:t,h,k:'hwall',c});
+ };
+ const tree=(x,y,size=42,pine=false)=>add(pine?'pine':'tree',C+x-size/2,C+y-size/2,size,size,pick(pine?['#245d38','#2d7542','#397f49']:['#287b3b','#31934a','#45a85a']));
+ const rock=(x,y,size=38)=>add('rock',C+x-size/2,C+y-size/2,size,size,pick(['#68796d','#78877b','#8a9688']));
+ const POI=[
+  ['Vila dos Guardiões',-2100,-1750,500],['Acampamento Pinheiral',2100,-2250,600],
+  ['Lago das Brumas',-1700,1750,620],['Ruínas da Mata',-3300,-650,480],
+  ['Cachoeira Esmeralda',1250,2850,520],['Posto dos Rangers',3000,-250,430],
+  ['Bosque Antigo',300,-3500,600],['Clareira das Flores',-3000,2850,500]
+ ];
+ for(const p of POI)pois.push({n:p[0],x:C+p[1],y:C+p[2],r:p[3]});
+ // trilhas de terra conectando clareiras e pontos de exploração
+ road(-W*.42,0,W*.42,0,54);road(0,-W*.42,0,W*.42,54);
+ for(const [x,y] of POI.slice(0,6))road(0,0,x*.82,y*.82,38);
+ // rio sinuoso e lagos naturais
+ const river=[[-3900,900],[-3200,1150],[-2500,1500],[-1750,1580],[-900,1250],[0,900],[850,1050],[1700,1550],[2600,2050],[3900,2400]];
+ for(let i=0;i<river.length-1;i++)road(river[i][0],river[i][1],river[i+1][0],river[i+1][1],76,'r');
+ lakes.push({x:C-1700,y:C+1750,r:310},{x:C+1250,y:C+2850,r:230},{x:C+3000,y:C-250,r:150});
+ // aldeia florestal
+ deco.push({k:'plaza',x:C-2100,y:C-1750,r:170,c:'#9a8666'});
+ cabin(-2100,-1850,220,170);cabin(-2350,-1580,180,145);cabin(-1820,-1550,190,150);
+ for(let i=0;i<18;i++){const a=i/18*TAU;tree(-2100+Math.cos(a)*330,-1750+Math.sin(a)*300,ri(38,58),Math.random()<.45)}
+ // acampamento sob as copas
+ deco.push({k:'fire',x:C+2100,y:C-2250});
+ for(let i=0;i<5;i++){const a=i/5*TAU;deco.push({k:'log',x:C+2100+Math.cos(a)*62,y:C-2250+Math.sin(a)*62,a:a+1.57})}
+ for(let i=0;i<4;i++)add('tent',C+1900+(i%2)*210,C-2450+Math.floor(i/2)*190,76,76,['#4c8b57','#b18a54','#6a8c9c','#9a6b58'][i]);
+ cabin(2350,-2050,190,150);loot.push({x:C+2100,y:C-2250,type:'med'},{x:C+2350,y:C-2050,type:'ammo'});
+ // ruínas cobertas de musgo
+ deco.push({k:'steps',x:C-3300,y:C-650,w:260,h:250,c:'#777f69'});
+ for(let i=0;i<10;i++){const a=i/10*TAU;add('pillar',C-3300+Math.cos(a)*250-17,C-650+Math.sin(a)*220-17,34,34,'#858b79')}
+ for(let i=0;i<12;i++)rock(-3300+Math.cos(i/12*TAU)*340,-650+Math.sin(i/12*TAU)*300,ri(34,64));
+ // posto dos guardas florestais
+ cabin(3000,-250,260,190,'#6f583e');add('tower',C+3250-35,C-450-35,70,70,'#778b72');
+ deco.push({k:'flag',x:C+3000,y:C-250,c:'#4d9659'});
+ // bosque antigo e clareira florida: rochas e vegetação em anéis
+ for(let i=0;i<26;i++){const a=i/26*TAU;tree(300+Math.cos(a)*430,-3500+Math.sin(a)*390,ri(42,68),i%3===0)}
+ deco.push({k:'field',x:C-3000,y:C+2850,w:520,h:360,c:'#6caa59'});
+ for(let i=0;i<16;i++)rock(-3000+Math.cos(i/16*TAU)*390,2850+Math.sin(i/16*TAU)*280,ri(24,44));
+ // cobertura vegetal distribuída por toda a ilha, mantendo corredores de exploração
+ for(let i=0;i<420;i++){
+  const a=rnd(0,TAU),d=Math.sqrt(Math.random())*(R0-240),x=Math.cos(a)*d,y=Math.sin(a)*d;
+  if(Math.hypot(x,y)<520)continue;
+  if(POI.some(p=>Math.hypot(x-p[1],y-p[2])<p[3]*.72))continue;
+  if(Math.abs(x)<230||Math.abs(y)<230)continue;
+  tree(x,y,ri(34,58),Math.random()<.38);
+ }
+ for(let i=0;i<95;i++){const a=rnd(0,TAU),d=rnd(600,R0-180);rock(Math.cos(a)*d,Math.sin(a)*d,ri(24,58))}
+ // pequenos troncos, arbustos e clareiras como cobertura visual leve
+ for(let i=0;i<34;i++){const x=rnd(-R0*.8,R0*.8),y=rnd(-R0*.8,R0*.8);if(Math.hypot(x,y)<R0-160&&!POI.some(p=>Math.hypot(x-p[1],y-p[2])<p[3]*.8))add('hay',C+x-18,C+y-18,36,36,'#587d45')}
+ // itens em locais de interesse
+ loot.push({x:C-2100,y:C-1750,type:'vest',lv:2},{x:C-1700,y:C+1750,type:'med'},
+  {x:C-3300,y:C-650,type:'ammo'},{x:C+3000,y:C-250,type:'vest',lv:2},
+  {x:C+1250,y:C+2850,type:'ammo'},{x:C+300,y:C-3500,type:'med'});
+ out.houses=houses;out.deco=deco;out.roads=roads;out.pois=pois;out.lakes=lakes;
+ out.loot=loot;return out;
+}
 
 /* ================= Arena dos Gladiadores (simétrica, 4 quadrantes) ================= */
 function genArena(W){
@@ -1878,7 +1759,7 @@ function styleMapForTheme(obs,theme,W){
 function startMatch(cfg){
  sfx.ui();const mode=cfg?'bloxglad':effMode(),arena=mode==='bloxglad',br=mode!=='bloxglad',W=br?9600:arena?3200:2800,D0=DIFF[(cfg&&cfg.df)||'normal']||DIFF.normal,LR=lobbyRank(),SK0=Math.min(1,LR/17),D={dmg:Math.min(1.2,D0.dmg*(.8+.4*SK0)),err:D0.err*(1.25-.9*SK0),sight:D0.sight*(.9+.45*SK0),spd:D0.spd*(.95+.2*SK0)};/* bots escalam com a patente do jogador, em todos os modos */
  camPP=0;camBl=0;lkY=lkP=0;M={mode,br,arena,ranked:mode==='ranked'&&!cfg,W,t:0,cd:3,cdN:0,ents:[],bullets:[],items:[],loot:[],lp:null,nl:null,parts:[],texts:[],feed:[],obs:[],zone:null,over:false,paused:false,kills:0,dmg:0,pick:0,score:[0,0],target:25,cam:{x:0,y:0},flash:0,itemT:0,endT:0,D,LR};
- M.mapTheme=br?(S.mapTheme||'floresta'):'floresta';M.obs=arena?genArena(W):(br?styleMapForTheme(genIsland(W),M.mapTheme,W):genObs(W,br));$('#btnC').classList.remove('on');$('#btnA').classList.remove('on');$('#match').style.setProperty('--bs',S.bs||1);$('#bsz').value=S.bs||1;$('#match').style.setProperty('--bo',S.bo==null?1:S.bo);$('#bop').value=S.bo==null?1:S.bo;M.houses=M.obs.houses||[];M.deco=M.obs.deco||[];M.roads=M.obs.roads||[];M.pois=M.obs.pois||[];M.lakes=M.obs.lakes||[];if(br)M.houses.forEach(h=>M.items.push({x:h.x+h.w/2,y:h.y+h.h/2,...(Math.random()<.5?{type:'med'}:{type:'vest',lv:rndVest()})}));
+ M.mapTheme='floresta';S.mapTheme='floresta';M.obs=arena?genArena(W):(br?styleMapForTheme(genIsland(W),M.mapTheme,W):genObs(W,br));$('#btnC').classList.remove('on');$('#btnA').classList.remove('on');$('#match').style.setProperty('--bs',S.bs||1);$('#bsz').value=S.bs||1;$('#match').style.setProperty('--bo',S.bo==null?1:S.bo);$('#bop').value=S.bo==null?1:S.bo;M.houses=M.obs.houses||[];M.deco=M.obs.deco||[];M.roads=M.obs.roads||[];M.pois=M.obs.pois||[];M.lakes=M.obs.lakes||[];if(br)M.houses.forEach(h=>M.items.push({x:h.x+h.w/2,y:h.y+h.h/2,...(Math.random()<.5?{type:'med'}:{type:'vest',lv:rndVest()})}));
  const used=new Set(),names=BOTN.slice().sort(()=>Math.random()-.5);
  const mkEnt=(o)=>Object.assign({x:0,y:0,r:16,hp:100,vl:0,vd:0,deadT:0,ang:rnd(0,TAU),alive:true,kills:0,cool:0,rel:0,slot:0,weap:[],bot:true,team:0,name:'',skin:'recruta',thinkT:0,target:null,dest:null,strafe:1,strafeT:0,sight:D.sight,spd:D.spd,hitT:0,respawn:0,lx:0,ly:0,stuckT:0,urgent:false,mate:false},o);
  const botWeap=()=>{const id=wpick([[15,'pistola'],[25,'smg'],[30,'rifle'],[18,'escopeta'],[12,'sniper'],[8,'revolver'],[7,'cacador'],[6,'plasma'],[5,'bastiao']]);return[mkW(id,D.dmg)]};
@@ -3080,7 +2961,32 @@ var RF=[];function reset0(){
   else if(o.k==='chimney'){bx(o.w,150,o.h,o.c,cx,75,cz,world);bx(o.w+2,10,o.h+2,'#e5e5e5',cx,118,cz,world);bx(o.w+2,10,o.h+2,'#e5e5e5',cx,132,cz,world);bx(o.w+5,6,o.h+5,'#333',cx,153,cz,world)}
   else if(o.k==='wall'){bx(o.w,44,o.h,o.c,cx,22,cz,world);bx(o.w+3,5,o.h+3,shade(o.c,-.3),cx,46,cz,world);bx(o.w+1,8,o.h+1,shade(o.c,-.2),cx,4,cz,world)}
   else bx(o.w,44,o.h,o.c,cx,22,cz,world)}
- RF=[];for(const h of(M.houses||[])){const cx=h.x+h.w/2,cz=h.y+h.h/2;bx(h.w,3,h.h,'#b98a5a',cx,1.5,cz,world);bx(h.w*.5,3.5,h.h*.5,'#8f6a3f',cx,2,cz,world);const r=new THREE.Group();world.add(r);bx(h.w+14,12,h.h+14,shade(h.c,-.45),cx,56,cz,r);bx(h.w*.7,12,h.h*.7,shade(h.c,-.3),cx,67,cz,r);bx(h.w*.35,10,h.h*.35,shade(h.c,-.15),cx,77,cz,r);bx(14,26,14,'#7a6a5a',cx+h.w*.28,76,cz-h.h*.2,r);RF.push({m:r,x:h.x,y:h.y,w:h.w,h:h.h})}
+ RF=[];for(let hi=0;hi<(M.houses||[]).length;hi++){const h=M.houses[hi],cx=h.x+h.w/2,cz=h.y+h.h/2;const r=new THREE.Group();world.add(r);const wood=h.c||'#8d6b4a',dark=shade(wood,-.42),light=shade(wood,.22),stone='#716653';
+  // fundação, piso e paredes com volumes definidos (sem colisores invisíveis no alto)
+  bx(h.w+18,5,h.h+18,stone,cx,2.5,cz,r);bx(h.w,4,h.h,'#b98a5a',cx,6,cz,r);
+  const floors=(hi%3===1||hi%4===0)?2:1,wallH= floors===2?34:27;
+  bx(h.w,wallH,h.h,dark,cx,8+wallH/2,cz,r);
+  // painéis de madeira e vigas aparentes
+  for(const side of[-1,1]){bx(7,wallH+3,h.h+5,light,cx+side*(h.w/2-5),8+wallH/2,cz,r);bx(h.w+5,6,7,light,cx,wallH+7,cz+side*(h.h/2-4),r)}
+  // janelas grandes com moldura e vidro
+  const win=(x,z)=>{bx(22,15,3,'#b8d9d0',x,19,z,r);bx(26,3,5,light,x,19,z,r);bx(3,18,6,light,x,19,z,r);bx(3,18,6,light,x+10,19,z,r)};
+  win(cx-h.w*.27,cz-h.h/2-1);win(cx+h.w*.27,cz-h.h/2-1);win(cx-h.w*.27,cz+h.h/2+1);
+  // porta, varanda e degraus de acesso claramente visíveis
+  bx(18,23,4,'#493326',cx,17,cz+h.h/2+1,r);bx(27,3,15,light,cx,7,cz+h.h/2+12,r);bx(22,4,10,wood,cx,4,cz+h.h/2+20,r);bx(17,3,8,wood,cx,2,cz+h.h/2+27,r);
+  // interior decorado: prateleiras, bancada, caixas e mesa
+  for(const side of[-1,1]){const sx=cx+side*(h.w*.29);bx(5,18,28,dark,sx,18,cz,r);for(let shelf=0;shelf<3;shelf++){bx(20,2,30,light,sx,12+shelf*7,cz,r);for(let jar=0;jar<3;jar++)bx(4,5,5,['#9b7048','#648c70','#c18a45'][(jar+shelf)%3],sx-6+jar*6,16+shelf*7,cz-2,r)}}
+  bx(34,5,24,'#765238',cx,10,cz+5,r);bx(5,13,5,stone,cx-13,3,cz-3,r);bx(5,13,5,stone,cx+13,3,cz-3,r);
+  for(let q=0;q<3;q++)bx(12,10,12,q===0?'#8a603c':'#9a754b',cx-22+q*20,13,cz-h.h*.23,r);
+  if(floors===2){bx(h.w+8,4,h.h+8,dark,cx,wallH+9,cz,r);bx(h.w,wallH-2,h.h,wood,cx,wallH+12+(wallH-2)/2,cz,r);bx(h.w+12,4,h.h+12,light,cx,wallH*2+12,cz,r);
+   // varanda superior com guarda-corpo e escada externa em degraus sólidos
+   bx(h.w*.62,3,20,wood,cx,wallH+14,cz+h.h/2+12,r);for(let q=0;q<5;q++)bx(4,12,4,light,cx-h.w*.3+q*(h.w*.15),wallH+21,cz+h.h/2+21,r);
+   for(let q=0;q<5;q++)bx(20,3,12,light,cx+h.w/2+13,7+q*5,cz+h.h*.22+q*9,r);
+   win(cx-h.w*.27,cz-h.h/2-1);win(cx+h.w*.27,cz-h.h/2-1);
+  }
+  // telhado inclinado estilizado, mantido como geometria visível e sem hitbox
+  bx(h.w+24,5,h.h+24,dark,cx,floors===2?wallH*2+20:wallH+14,cz,r);bx(h.w*.72,7,h.h*.72,light,cx,floors===2?wallH*2+26:wallH+20,cz,r);
+  bx(12,15,12,stone,cx+h.w*.29,floors===2?wallH*2+34:wallH+28,cz-h.h*.2,r);
+  RF.push({m:r,x:h.x,y:h.y,w:h.w,h:h.h})}
  if(M.arena){ground.visible=sand.visible=sea.visible=false;arenaScene(W);return}
  ground.visible=sand.visible=sea.visible=true;
  if(M.br){if(M.roads&&M.roads.length){drawRoads();drawDeco()}else{const L=W*.9;bx(L,1.5,120,'#4a505c',W/2,.8,W/2,world);bx(120,1.5,L,'#4a505c',W/2,.9,W/2,world);bx(L,1.6,5,'#e8d77a',W/2,1.4,W/2,world);bx(5,1.6,L,'#e8d77a',W/2,1.5,W/2,world)}}
@@ -3171,7 +3077,7 @@ function draw(){
  if(!isFinite(camPP))camPP=0;const fcm=ffCam(T3.x,T3.y,A3,ads,camPP);cam.position.set(fcm.cx,fcm.H,fcm.cy);if(M.shk>.01){const k=M.shk*M.shk*14;cam.position.x+=(Math.random()-.5)*k;cam.position.y+=(Math.random()-.5)*k;cam.position.z+=(Math.random()-.5)*k}cam.lookAt(fcm.cx+fcm.vx*Math.cos(fcm.pt)*500,fcm.H+Math.sin(fcm.pt)*500,fcm.cy+fcm.vy*Math.cos(fcm.pt)*500);
  {const fv=47-15*camBl;if(Math.abs(cam.fov-fv)>.01)cam.fov=fv}
  cam.updateProjectionMatrix();
- {const hr=new Date().getHours(),tm=S.tod||'por',timeMd=tm==='noite'?'n':tm==='por'?'s':tm==='dia'?'d':(hr<5||hr>=19?'n':(hr<7||hr>=17?'s':'d')),md=M.br?(M.mapTheme==='deserto'?'s':M.mapTheme==='cidade'?'n':'d'):timeMd;if(g3._m!==md){g3._m=md;setSky(md)}const theme=M.br?(M.mapTheme||'floresta'):'floresta';if(g3._mt!==theme){g3._mt=theme;ground.visible=theme!=='deserto';sand.visible=theme==='deserto';for(let i=0;i<16;i++)for(let j=0;j<16;j++){const v=Math.random();tx.fillStyle=theme==='cidade'?(v<.35?'#626d78':v<.7?'#707b86':v<.9?'#596571':'#818b95'):(v<.34?'#4f9a49':v<.58?'#5aa852':v<.78?'#468a40':v<.9?'#63b45a':v<.97?'#3f8039':'#7bc96c');tx.fillRect(i,j,1,1)}tex.needsUpdate=true}
+ {const hr=new Date().getHours(),tm=S.tod||'por',timeMd=tm==='noite'?'n':tm==='por'?'s':tm==='dia'?'d':(hr<5||hr>=19?'n':(hr<7||hr>=17?'s':'d')),md=M.br?(M.mapTheme==='deserto'?'s':M.mapTheme==='cidade'?'n':'d'):timeMd;if(g3._m!==md){g3._m=md;setSky(md)}const theme='floresta';if(g3._mt!==theme){g3._mt=theme;ground.visible=theme!=='deserto';sand.visible=theme==='deserto';for(let i=0;i<16;i++)for(let j=0;j<16;j++){const v=Math.random();tx.fillStyle=theme==='cidade'?(v<.35?'#626d78':v<.7?'#707b86':v<.9?'#596571':'#818b95'):(v<.34?'#4f9a49':v<.58?'#5aa852':v<.78?'#468a40':v<.9?'#63b45a':v<.97?'#3f8039':'#7bc96c');tx.fillRect(i,j,1,1)}tex.needsUpdate=true}
  const dv=SK[md].dir;sky.position.copy(cam.position);stars.position.copy(cam.position);sunM.position.set(cam.position.x+dv[0]*3800,cam.position.y+dv[1]*3800,cam.position.z+dv[2]*3800)}
  const z=M.zone;zone.visible=!!z;if(z){zone.position.set(z.cx,130,z.cy);zone.scale.set(z.r,1,z.r)}
  for(const e of M.ents){let o=E.get(e);if(!o){o=mk(e);E.set(e,o)}
@@ -4565,6 +4471,28 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #lobby .pBn .pnr{bottom:5px;right:10px}
 #lobby .pBn b{font-size:13.5px}
 @media (max-aspect-ratio:1/1){#lobby .profile{width:clamp(150px,calc(100vw - 184px),224px)}}
+/* ===== BF-PROFILE-FIX: perfil externo (foto + banner + nome + LEVEL) alinhado e responsivo ===== */
+/* LEVEL centralizado na vertical, em faixa própria à direita (não sobe nem invade o banner) */
+#lobby .profile .lvl{top:50%;bottom:auto;right:10px;transform:translateY(-50%);margin:0}
+/* banner termina antes da faixa do LEVEL, qualquer que seja a largura do cartão */
+#lobby .pBn{width:calc(100% - 76px)}
+#lobby .pBn .pnr{left:6px;right:10px}
+#lobby .pBn b{min-width:0}
+/* celulares estreitos (≤360px): cartão mais enxuto, mantendo foto/banner/LEVEL alinhados */
+@media (max-width:360px){
+ #lobby .profile .lvl{right:7px;width:16px;height:16px;font-size:8.5px}
+ #lobby .pBn{width:calc(100% - 70px)}
+ #lobby .pBn .pnr{left:5px;right:7px;gap:3px}
+ #lobby .pBn .pnr #pRank svg{width:14px;height:14px}
+ #lobby .pBn b{font-size:12px}
+}
+@media (max-width:340px){
+ #lobby .profile .lvl{right:5px}
+ #lobby .pBn{width:calc(100% - 66px)}
+ #lobby .pBn .pnr{left:4px;right:5px;gap:2px}
+ #lobby .pBn b{font-size:11px;letter-spacing:0}
+ #lobby .pBn .pnr #pRank svg{width:12px;height:12px}
+}
 </style>
 <script id="bf-adapt-js">
 /* ===== BF-ADAPT: ajuste automático de layout (lobby + HUD da partida) ===== */
