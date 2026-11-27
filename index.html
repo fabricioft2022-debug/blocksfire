@@ -711,7 +711,7 @@ function verClean(nv){nv=+nv||0;let ch=false;const cur=nv>0?'ver'+nv:'';
  if(bad(S.profileEquipped)){S.profileEquipped=cur;ch=true}
  if(nv<1&&(S.vtG||S.vtC)){delete S.vtG;delete S.vtC;ch=true}
  return ch}
-function pResolve(kind){const un=pUnl(kind==='p'?'p':'b'),v=S[kind];if(un.includes(v))return v;if(kind==='p')return un.includes(S.skin)?S.skin:'recruta';return 'recruta'}
+function pResolve(kind){const un=pUnl(kind==='pbn'||kind==='b'?'b':'p'),v=S[kind];if(un.includes(v))return v;if(kind==='p')return un.includes(S.skin)?S.skin:'recruta';return 'recruta'}
 const pubProf=()=>({pf:pResolve('pfp'),pb:pResolve('pbn')});
 function pBlock(pf,pb,sk,v){v=+v||0;const gt=k=>((k==='ver1'&&v!==1)||(k==='ver2'&&v!==2))?'':k;pf=gt(pf);pb=gt(pb);const f=hasP(pf)?pf:(hasP(sk)?sk:'recruta'),b=hasP(pb)?pb:(hasP(sk)?sk:'recruta');
  return`<div class="pfx"><div class="pfp"><img src="${PIMG[f].p}" alt="Foto de perfil" draggable="false"></div><div class="pfb"><img src="${PIMG[b].b}" alt="Banner" draggable="false"></div></div>`}
@@ -1587,7 +1587,7 @@ modal.addEventListener('click',e=>{
   if(a==='tab'){shopTab=id;return renderPanel()}
  if(a==='equip'){S.skin=id;S.fit={};sfx.ui()}
  else if(a==='equipW'){S.weapon=id;sfx.ui()}
- else if(a==='buyProfile'){const p=PROFILE_ITEMS.find(x=>x.id===id);if(!p||S.profileOwned.includes(id))return;if(S.gems<p.price)return toast('Diamantes insuficientes');S.gems-=p.price;S.profileOwned.push(id);S.profileEquipped=id;save();sfx.pick();refreshCur();return showBuyReward({title:'PERFIL DESBLOQUEADO!',color:'#b66bff',vis:'<img src="'+p.img+'" alt="" draggable="false" style="width:156px;height:156px;object-fit:cover">',name:BFV.esc(p.name),sub:'FOTO DE PERFIL · JÁ EQUIPADA'})}
+ else if(a==='buyProfile'){const p=PROFILE_ITEMS.find(x=>x.id===id);if(!p||S.profileOwned.includes(id))return;if(S.gems<p.price)return toast('Diamantes insuficientes');S.gems-=p.price;S.profileOwned.push(id);S.profileEquipped=id;S.pfp=id;save();sfx.pick();refreshCur();return showBuyReward({title:'PERFIL DESBLOQUEADO!',color:'#b66bff',vis:'<img src="'+p.img+'" alt="" draggable="false" style="width:156px;height:156px;object-fit:cover">',name:BFV.esc(p.name),sub:'FOTO DE PERFIL · JÁ EQUIPADA'})}
  else if(a==='equipProfile'){if(!S.profileOwned.includes(id))return;S.profileEquipped=id;S.pfp=id;save();sfx.ui();toast('Perfil equipado');return renderPanel()}
  else if(a==='unequipProfile'){if(!S.profileOwned.includes(id))return;S.profileEquipped='';S.pfp='recruta';save();sfx.ui();toast('Perfil removido');return renderPanel()}
  else if(a==='buySkin'){const s=skinOf(id),pr=b.dataset.disc?Math.floor(s.p*.75):s.p;if(S.skins.includes(id))return;if(S.gems<pr)return toast('Diamantes insuficientes');S.gems-=pr;S.skins.push(id);if(!Array.isArray(S.pun))S.pun=[];if(!S.pun.includes(id))S.pun.push(id);save();refreshCur();sfx.pick();return showSkinReward(id)}
