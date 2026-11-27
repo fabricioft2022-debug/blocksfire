@@ -1626,11 +1626,12 @@ function genIsland(W){
  const add=(k,x,y,w,h,c)=>out.push({k,x,y,w,h,c});
  const road=(x1,y1,x2,y2,w,t='d')=>roads.push({x1:C+x1,y1:C+y1,x2:C+x2,y2:C+y2,w,t});
  const cabin=(x,y,w,h,c='#76543a')=>{
+  w*=1.42;h*=1.42;
   houses.push({x:C+x-w/2,y:C+y-h/2,w,h,c});
-  const t=12,g=52;
-  out.push({x:C+x-w/2,y:C+y-h/2,w:(w-g)/2,h:t,k:'hwall',c},
-   {x:C+x+(g/2),y:C+y-h/2,w:(w-g)/2,h:t,k:'hwall',c},
-   {x:C+x-w/2,y:C+y+h/2-t,w,h:t,k:'hwall',c},
+  const t=12,g=76;
+  out.push({x:C+x-w/2,y:C+y-h/2,w,h:t,k:'hwall',c},
+   {x:C+x-w/2,y:C+y+h/2-t,w:(w-g)/2,h:t,k:'hwall',c},
+   {x:C+x+g/2,y:C+y+h/2-t,w:(w-g)/2,h:t,k:'hwall',c},
    {x:C+x-w/2,y:C+y-h/2,w:t,h,k:'hwall',c},
    {x:C+x+w/2-t,y:C+y-h/2,w:t,h,k:'hwall',c});
  };
@@ -2073,7 +2074,6 @@ function lootAll(){
 function moveEnt(e,dx,dy){
  e.x+=dx;e.y+=dy;
  for(const o of M.obs){
-  if(e.jt>0&&['rock','crate','barrel','hay'].includes(o.k))continue;
   if(e.x<o.x-e.r||e.x>o.x+o.w+e.r||e.y<o.y-e.r||e.y>o.y+o.h+e.r)continue;
   const nx=clamp(e.x,o.x,o.x+o.w),ny=clamp(e.y,o.y,o.y+o.h);let d=Math.hypot(e.x-nx,e.y-ny);
   if(d<e.r){
@@ -2966,38 +2966,18 @@ var RF=[];function reset0(){
   else if(o.k==='chimney'){bx(o.w,150,o.h,o.c,cx,75,cz,world);bx(o.w+2,10,o.h+2,'#e5e5e5',cx,118,cz,world);bx(o.w+2,10,o.h+2,'#e5e5e5',cx,132,cz,world);bx(o.w+5,6,o.h+5,'#333',cx,153,cz,world)}
   else if(o.k==='wall'){bx(o.w,44,o.h,o.c,cx,22,cz,world);bx(o.w+3,5,o.h+3,shade(o.c,-.3),cx,46,cz,world);bx(o.w+1,8,o.h+1,shade(o.c,-.2),cx,4,cz,world)}
   else bx(o.w,44,o.h,o.c,cx,22,cz,world)}
- RF=[];for(let hi=0;hi<(M.houses||[]).length;hi++){const h=M.houses[hi],cx=h.x+h.w/2,cz=h.y+h.h/2;const r=new THREE.Group();world.add(r);const wood=h.c||'#8d6b4a',dark=shade(wood,-.42),light=shade(wood,.22),stone='#716653';
-  // fundação, piso e paredes com volumes definidos (sem colisores invisíveis no alto)
-  bx(h.w+18,5,h.h+18,stone,cx,2.5,cz,r);bx(h.w,4,h.h,'#b98a5a',cx,6,cz,r);
-  const floors=(hi%3===1||hi%4===0)?2:1,wallH= floors===2?34:27;
-  // paredes separadas para deixar a entrada realmente aberta; o interior fica visível ao entrar
-  const thick=7,doorW=Math.min(34,h.w*.32),half=(h.w-doorW)/2;
-  bx(h.w,wallH,thick,dark,cx,8+wallH/2,cz-h.h/2+thick/2,r);
-  bx(thick,wallH,h.h,dark,cx-h.w/2+thick/2,8+wallH/2,cz,r);
-  bx(thick,wallH,h.h,dark,cx+h.w/2-thick/2,8+wallH/2,cz,r);
-  bx(half,wallH,thick,dark,cx-doorW/2-half/2,8+wallH/2,cz+h.h/2-thick/2,r);
-  bx(half,wallH,thick,dark,cx+doorW/2+half/2,8+wallH/2,cz+h.h/2-thick/2,r);
-  // vigas e molduras visíveis, sem fechar o interior com um bloco maciço
-  for(const side of[-1,1]){bx(5,wallH+3,h.h+5,light,cx+side*(h.w/2-4),8+wallH/2,cz,r);bx(h.w+5,5,5,light,cx,wallH+6,cz-h.h/2+4,r)}
-  // janelas grandes com moldura e vidro
-  const win=(x,z)=>{bx(22,15,3,'#b8d9d0',x,19,z,r);bx(26,3,5,light,x,19,z,r);bx(3,18,6,light,x,19,z,r);bx(3,18,6,light,x+10,19,z,r)};
-  win(cx-h.w*.27,cz-h.h/2-1);win(cx+h.w*.27,cz-h.h/2-1);win(cx-h.w*.27,cz+h.h/2+1);
-  // porta, varanda e degraus de acesso claramente visíveis
-  bx(18,23,4,'#493326',cx,17,cz+h.h/2+1,r);bx(27,3,15,light,cx,7,cz+h.h/2+12,r);bx(22,4,10,wood,cx,4,cz+h.h/2+20,r);bx(17,3,8,wood,cx,2,cz+h.h/2+27,r);
-  // interior decorado: prateleiras, bancada, caixas e mesa
-  for(const side of[-1,1]){const sx=cx+side*(h.w*.29);bx(5,18,28,dark,sx,18,cz,r);for(let shelf=0;shelf<3;shelf++){bx(20,2,30,light,sx,12+shelf*7,cz,r);for(let jar=0;jar<3;jar++)bx(4,5,5,['#9b7048','#648c70','#c18a45'][(jar+shelf)%3],sx-6+jar*6,16+shelf*7,cz-2,r)}}
-  bx(34,5,24,'#765238',cx,10,cz+5,r);bx(5,13,5,stone,cx-13,3,cz-3,r);bx(5,13,5,stone,cx+13,3,cz-3,r);
-  for(let q=0;q<3;q++)bx(12,10,12,q===0?'#8a603c':'#9a754b',cx-22+q*20,13,cz-h.h*.23,r);
-  if(floors===2){bx(h.w+8,4,h.h+8,dark,cx,wallH+9,cz,r);bx(h.w,wallH-2,h.h,wood,cx,wallH+12+(wallH-2)/2,cz,r);bx(h.w+12,4,h.h+12,light,cx,wallH*2+12,cz,r);
-   // varanda superior com guarda-corpo e escada externa em degraus sólidos
-   bx(h.w*.62,3,20,wood,cx,wallH+14,cz+h.h/2+12,r);for(let q=0;q<5;q++)bx(4,12,4,light,cx-h.w*.3+q*(h.w*.15),wallH+21,cz+h.h/2+21,r);
-   for(let q=0;q<5;q++)bx(20,3,12,light,cx+h.w/2+13,7+q*5,cz+h.h*.22+q*9,r);
-   win(cx-h.w*.27,cz-h.h/2-1);win(cx+h.w*.27,cz-h.h/2-1);
-  }
-  // telhado inclinado estilizado, mantido como geometria visível e sem hitbox
-  bx(h.w+24,5,h.h+24,dark,cx,floors===2?wallH*2+20:wallH+14,cz,r);bx(h.w*.72,4,7,light,cx,floors===2?wallH*2+26:wallH+20,cz-h.h*.34,r);bx(7,4,h.h*.72,light,cx-h.w*.34,floors===2?wallH*2+26:wallH+20,cz,r);
-  bx(12,15,12,stone,cx+h.w*.29,floors===2?wallH*2+34:wallH+28,cz-h.h*.2,r);
+ RF=[];for(let hi=0;hi<(M.houses||[]).length;hi++){const h=M.houses[hi],cx=h.x+h.w/2,cz=h.y+h.h/2;const r=new THREE.Group();world.add(r);const wood=h.c||'#8d6b4a',light=shade(wood,.28),dark=shade(wood,-.35);
+  // As paredes são desenhadas uma única vez pelos segmentos hwall; isso elimina z-fighting.
+  bx(h.w-18,3,h.h-18,'#b98a5a',cx,5,cz,r);
+  // Interior aberto e visível pela entrada larga.
+  for(const side of[-1,1]){const sx=cx+side*h.w*.31;bx(5,18,32,dark,sx,16,cz,r);for(let shelf=0;shelf<3;shelf++){bx(24,2,34,light,sx,10+shelf*7,cz,r);for(let jar=0;jar<3;jar++)bx(5,5,5,['#9b7048','#648c70','#c18a45'][(jar+shelf)%3],sx-8+jar*8,14+shelf*7,cz-2,r)}}
+  bx(38,5,28,'#765238',cx,9,cz+8,r);for(const sx of[-14,14])bx(5,12,5,dark,cx+sx,3,cz+4,r);
+  bx(22,10,18,'#9a754b',cx-h.w*.23,9,cz-h.h*.22,r);bx(22,10,18,'#8a603c',cx+h.w*.23,9,cz-h.h*.22,r);
+  // Telhado elevado e compacto, sem duplicar paredes nem fechar a entrada.
+  bx(h.w+10,5,h.h+10,dark,cx,58,cz,r);bx(h.w*.72,3,7,light,cx,62,cz-h.h*.32,r);bx(7,3,h.h*.72,light,cx-h.w*.32,62,cz,r);
+  bx(12,16,12,'#716653',cx+h.w*.28,68,cz-h.h*.2,r);
   RF.push({m:r,x:h.x,y:h.y,w:h.w,h:h.h})}
+
  if(M.arena){ground.visible=sand.visible=sea.visible=false;arenaScene(W);return}
  ground.visible=sand.visible=sea.visible=true;
  if(M.br){if(M.roads&&M.roads.length){drawRoads();drawDeco()}else{const L=W*.9;bx(L,1.5,120,'#4a505c',W/2,.8,W/2,world);bx(120,1.5,L,'#4a505c',W/2,.9,W/2,world);bx(L,1.6,5,'#e8d77a',W/2,1.4,W/2,world);bx(5,1.6,L,'#e8d77a',W/2,1.5,W/2,world)}}
