@@ -4923,11 +4923,11 @@ const A=document.getElementById('adm'),B=document.getElementById('admB'),q=s=>A.
 const ST=document.createElement('style');ST.textContent='#admT{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);z-index:2147483000;width:min(440px,calc(100vw - 20px));box-sizing:border-box;padding:12px 14px;border-radius:10px;font:600 14px/1.35 system-ui,sans-serif;color:#fff;background:#2a2146;border:2px solid #9b7bff;box-shadow:0 8px 28px rgba(0,0,0,.65);white-space:pre-wrap;overflow-wrap:anywhere;pointer-events:none}#admT.ok{background:#0f3a22;border-color:#2ecc71}#admT.err{background:#4a1018;border-color:#ff4d57}#adm #aM{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;margin:0;padding:6px 0;background:rgba(18,8,31,.94)}';document.head.appendChild(ST);
 const T=document.createElement('div');T.id='admT';T.hidden=true;A.appendChild(T);let tt=0;
 function tell(k,x,ms){clearTimeout(tt);T.className=k;T.textContent=x;T.hidden=false;const d=ms===undefined?(k==='ok'?6000:k==='err'?15000:0):ms;if(d)tt=setTimeout(()=>{T.hidden=true},d)}
-const TMO=(p,ms)=>{let h;return Promise.race([p,new Promise((_,r)=>{h=setTimeout(()=>r(Object.assign(new Error('timeout'),{code:'timeout'})),ms||15000)})]).finally(()=>clearTimeout(h))};
+const TMO=(p,ms)=>{let h;return Promise.race([p,new Promise((_,r)=>{h=setTimeout(()=>r(Object.assign(new Error('timeout'),{code:'timeout'})),ms||30000)})]).finally(()=>clearTimeout(h))};
 function FR(e){const c=String(e&&e.code||'').split('/').pop(),m=e&&e.message||'';
  if(typeof navigator!=='undefined'&&navigator.onLine===false)return 'Sem internet no aparelho.';
  if(c==='permission-denied')return 'Sem permissão no Firestore (permission-denied). As regras do banco não deixam este admin salvar nesse documento.';
- if(c==='timeout')return 'O servidor não respondeu em 15s. Confira a internet. A ordem pode ter ficado na fila e ser aplicada depois: veja o jogador antes de repetir.';
+ if(c==='timeout')return 'O servidor não respondeu em 30s. Confira a internet. A ordem pode ter ficado na fila e ser aplicada depois: veja o jogador antes de repetir.';
  if(c==='unavailable'||c==='deadline-exceeded')return 'Servidor indisponível ('+c+'). Confira a internet e tente de novo.';
  if(c==='unauthenticated'||c==='user-token-expired'||c==='no-session')return 'Sessão do admin expirou. Toque em "Sair do admin" e entre de novo.';
  if(c==='resource-exhausted')return 'Cota do Firebase esgotada (resource-exhausted).';
@@ -4940,7 +4940,7 @@ function adminInit(){if(admP)return admP;admP=(async()=>{let F,AU,FS;
  catch(e){const J='https://cdn.jsdelivr.net/npm/firebase@'+FBV+'/';F=await import(J+'app/+esm');AU=await import(J+'auth/+esm');FS=await import(J+'firestore/+esm')}
  const app=F.getApps().find(a=>a.name==='admin')||F.initializeApp(FBCFG,'admin');
  const auth=AU.getAuth(app);try{await AU.setPersistence(auth,AU.inMemoryPersistence)}catch(e){}
- const db=FS.getFirestore(app),R=p=>FS.doc(db,...p.split('/'));
+ let db;try{db=FS.initializeFirestore(app,{experimentalForceLongPolling:true,useFetchStreams:false})}catch(e){db=FS.getFirestore(app)}const R=p=>FS.doc(db,...p.split('/'));
  return{AU,auth,adb:{doc:p=>({get:async()=>{const s=await TMO(FS.getDoc(R(p)));return{data:()=>s.exists()?s.data():null}},set:async o=>{await TMO(FS.setDoc(R(p),JSON.parse(JSON.stringify(o))))}})}}})();
  admP.catch(()=>{admP=null});return admP}
 function out(){A.hidden=true;stop();const X=ADM;ADM=null;ADB=null;if(X)X.AU.signOut(X.auth).catch(()=>{})}
