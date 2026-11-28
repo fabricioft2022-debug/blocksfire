@@ -5150,6 +5150,21 @@ window.BFAdapt={refresh:()=>sched(0)};
  .bfc-b.fr.conv .bfc-back{display:grid}
 }
 @media (max-height:420px){.bfc-av{width:32px;height:32px}.bfc-fr{padding:7px 10px}.bfc-m{padding:6px 10px}}
+.bfc-pa{width:40px;height:40px;flex:none;padding:0;border:2px solid rgba(255,255,255,.3);border-radius:7px;background-color:#223452;background-size:cover;background-position:center;background-repeat:no-repeat;display:grid;place-items:center;font:700 16px var(--f-body,sans-serif);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.4);cursor:pointer}
+.bfc-pa:active{transform:scale(.94)}
+.bfc-pa.ghost{visibility:hidden;border:0;cursor:default}
+.bfc-msg.hb{overflow:hidden;min-width:170px}
+.bfc-bn{position:relative;height:38px;margin:-6px -10px 6px;background-color:#33496b;background-size:cover;background-position:center;background-repeat:no-repeat;display:flex;align-items:flex-end;cursor:pointer}
+.bfc-bn::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.65),rgba(0,0,0,0) 75%)}
+.bfc-bn em{position:relative;z-index:1;display:flex!important;align-items:center;gap:4px;margin:0!important;padding:0 9px 4px;color:#fff!important;text-shadow:0 1px 3px #000;font:700 13px var(--f-body,sans-serif);font-style:normal}
+.bfc-l{padding:8px 8px 4px}
+.bfc-l .bfc-fr{width:100%;margin:0 0 12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;overflow:hidden;min-height:60px}
+.bfc-l .bfc-fr>.bfc-pa,.bfc-l .bfc-fr>.bfc-t,.bfc-l .bfc-fr>time,.bfc-l .bfc-fr>.bfc-bd{position:relative;z-index:1}
+.bfc-l .bfc-fr b{text-shadow:0 1px 3px #000}
+.bfc-l .bfc-fr small{color:#c3d1e6;text-shadow:0 1px 2px #000}
+.bfc-fbn{position:absolute;inset:0;background-color:#22344f;background-size:cover;background-position:center;background-repeat:no-repeat}
+.bfc-fbn::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(10,17,30,.9),rgba(10,17,30,.4))}
+.bfc-l .bfc-fr .bfc-pa{width:44px;height:44px}
 </style>
 <div id="bfChat" hidden>
  <div class="bfc" role="dialog" aria-label="Chat">
@@ -5205,7 +5220,7 @@ function getFS(){
 function setInfo(t,err){I.hidden=!t;I.textContent=t||'';I.classList.toggle('err',!!err)}
 function setEmpty(ic,t){M.innerHTML='<div class="bfc-e"><span>'+ic+'</span>'+esc(t)+'</div>'}
 function head(av,title,sub){
- const a=$q('#bfcAv');a.style.cssText=av?avs(av):'background:linear-gradient(135deg,#ffc933,#ff9f00)';
+ const a=$q('#bfcAv');a.className='bfc-av';delete a.dataset.p;a.style.cssText=av?avs(av):'background:linear-gradient(135deg,#ffc933,#ff9f00)';
  a.textContent=av?ini(av):'🌍';$q('#bfcCT').textContent=title;$q('#bfcCS').textContent=sub||'';
 }
 function fail(e){
@@ -5230,15 +5245,55 @@ async function who(){
  return {pid:String(pid),uid:u.uid};
 }
 function stop(){if(unM){try{unM()}catch(e){}unM=null}}
+let pt=0;
+const dynSt=document.createElement('style');dynSt.id='bfc-dyn';document.head.appendChild(dynSt);
+const dynSet=new Set();
+function hasPI(k){return typeof PIMG!=='undefined'&&typeof k==='string'&&Object.prototype.hasOwnProperty.call(PIMG,k)}
+function pcls(kind,key){
+ const cn='bfc-i-'+kind+'-'+String(key).replace(/[^a-z0-9]/gi,'_');
+ if(!dynSet.has(cn)){dynSet.add(cn);try{dynSt.sheet.insertRule('.'+cn+'{background-image:url('+PIMG[key][kind]+')}',dynSt.sheet.cssRules.length)}catch(e){}}
+ return cn;
+}
+function picOf(d){
+ if(!d||typeof PIMG==='undefined')return null;
+ const v=+d.ver||0,gt=k=>((k==='ver1'&&v!==1)||(k==='ver2'&&v!==2))?'':k;
+ const pf=gt(d.pf),pb=gt(d.pb),sk=d.skin;
+ return{f:hasPI(pf)?pf:(hasPI(sk)?sk:'recruta'),b:hasPI(pb)?pb:(hasPI(sk)?sk:'recruta')};
+}
+function mineData(){try{const s=gS();return{pf:pResolve('pfp'),pb:pResolve('pbn'),skin:s.skin,ver:s.ver,name:s.name}}catch(e){return null}}
+function openProf(p){
+ if(typeof openPanel!=='function')return;
+ close();openPanel('amigos');
+ let n=0;const t=setInterval(()=>{
+  const inp=document.getElementById('fsrch'),btn=document.querySelector('[data-fa="search"]');
+  if(inp&&btn){clearInterval(t);inp.value=p;btn.click()}else if(++n>25)clearInterval(t);
+ },100);
+}
 function paint(list,priv,me){
+ const my=++pt;
+ if(priv||!list.length){paintNow(list,priv,me,{});return}
+ const CLx=window.CL,ds={};
+ const ids=[...new Set(list.map(m=>String(m.pid)))].filter(p=>p&&p!==me);
+ Promise.all(ids.map(p=>(CLx&&CLx.prof?CLx.prof(p):Promise.resolve(null)).then(d=>{ds[p]=d}).catch(()=>{ds[p]=null}))).then(()=>{if(my===pt)paintNow(list,priv,me,ds)});
+}
+function paintNow(list,priv,me,ds){
  const near=M.scrollHeight-M.scrollTop-M.clientHeight<80;
  if(!list.length){setEmpty(priv?'👋':'💬',priv?'Nenhuma mensagem ainda. Diga oi!':'Ninguém falou ainda. Seja o primeiro!');return}
  let h='',prev=null;
  list.forEach(m=>{
-  const mine=String(m.pid)===me,first=prev!==String(m.pid);prev=String(m.pid);
+  const pid=String(m.pid),mine=pid===me,first=prev!==pid;prev=pid;
   h+='<div class="bfc-row'+(mine?' mine':'')+(first?' first':'')+'">';
-  if(!priv&&!mine)h+=first?'<span class="bfc-av sm" style="'+avs(m.name)+'">'+esc(ini(m.name))+'</span>':'<span class="bfc-av sm ghost"></span>';
-  h+='<div class="bfc-msg">'+(!priv&&!mine&&first?'<em style="color:'+nick(m.name)+'">'+esc(m.name||'Jogador')+'</em>':'')+esc(m.text)+'<time>'+hm(m.ts)+'</time></div></div>';
+  if(priv){
+   h+='<div class="bfc-msg">'+esc(m.text)+'<time>'+hm(m.ts)+'</time></div>';
+  }else{
+   const d=mine?mineData():ds[pid],pic=picOf(d),nm=(d&&d.name)||m.name||'Jogador';
+   const av=first?'<button type="button" class="bfc-pa'+(pic?' '+pcls('p',pic.f):'')+'" data-p="'+esc(pid)+'" aria-label="Ver perfil de '+esc(nm)+'"'+(pic?'':' style="'+avs(nm)+'"')+'>'+(pic?'':esc(ini(nm)))+'</button>':'<span class="bfc-pa ghost"></span>';
+   const vb=d&&+d.ver&&typeof BFV!=='undefined'?BFV.img(d.ver):'';
+   const hd=first?'<div class="bfc-bn'+(pic?' '+pcls('b',pic.b):'')+'" data-p="'+esc(pid)+'"><em>'+esc(nm)+vb+'</em></div>':'';
+   const body='<div class="bfc-msg'+(first?' hb':'')+'">'+hd+esc(m.text)+'<time>'+hm(m.ts)+'</time></div>';
+   h+=mine?body+av:av+body;
+  }
+  h+='</div>';
  });
  M.innerHTML=h;
  if(near||M.dataset.g!==String(gen)){M.style.scrollBehavior='auto';M.scrollTop=M.scrollHeight;M.style.scrollBehavior='';M.dataset.g=String(gen)}
@@ -5264,6 +5319,7 @@ async function openFriends(){
 async function openChat(fp,g){
  curF=String(fp);g=g||++gen;if(g!==gen)return;stop();layout();CH.hidden=false;F.hidden=false;setInfo('');
  head(curName||curF,curName||('#'+curF),'ID #'+curF);setEmpty('⏳','Carregando…');
+ (window.CL&&window.CL.prof?window.CL.prof(curF):Promise.resolve(null)).then(d=>{if(g!==gen)return;const pic=picOf(d);if(!pic)return;const av=$q('#bfcAv');av.textContent='';av.style.cssText='';av.className='bfc-av bfc-pa '+pcls('p',pic.f);av.dataset.p=curF}).catch(()=>{});
  const me=await who();if(!me||g!==gen)return;F.hidden=false;
  const id=cid(me.pid,curF);
  try{
@@ -5283,8 +5339,8 @@ async function renderList(g){
  const CLx=window.CL;
  const ps=await Promise.all(rows.map(r=>CLx&&CLx.prof?CLx.prof(r.p).catch(()=>null):null));
  if(g!=null&&g!==gen)return;
- L.innerHTML=rows.map((r,i)=>{const d=ps[i],nm=d&&d.name?d.name:(r.m&&r.m.names&&r.m.names[r.p])||('#'+r.p);
-  return '<button type="button" class="bfc-fr'+(curF===r.p?' on':'')+'" data-p="'+esc(r.p)+'" data-n="'+esc(nm)+'"><span class="bfc-av" style="'+avs(nm)+'">'+esc(ini(nm))+'</span><span class="bfc-t"><b>'+esc(nm)+'</b><small>'+(r.m&&r.m.last?esc(r.m.last):'Toque para conversar')+'</small></span>'+(r.ts?'<time>'+hm(r.ts)+'</time>':'')+(r.un?'<i class="bfc-bd">•</i>':'')+'</button>'}).join('');
+ L.innerHTML=rows.map((r,i)=>{const d=ps[i],nm=d&&d.name?d.name:(r.m&&r.m.names&&r.m.names[r.p])||('#'+r.p),pic=picOf(d),vb=d&&+d.ver&&typeof BFV!=='undefined'?BFV.img(d.ver):'';
+  return '<button type="button" class="bfc-fr'+(curF===r.p?' on':'')+(pic?' hb':'')+'" data-p="'+esc(r.p)+'" data-n="'+esc(nm)+'">'+(pic?'<span class="bfc-fbn '+pcls('b',pic.b)+'"></span>':'')+'<span class="bfc-pa'+(pic?' '+pcls('p',pic.f):'')+'" role="button" tabindex="0" data-p="'+esc(r.p)+'" aria-label="Ver perfil de '+esc(nm)+'"'+(pic?'':' style="'+avs(nm)+'"')+'>'+(pic?'':esc(ini(nm)))+'</span><span class="bfc-t"><b>'+esc(nm)+vb+'</b><small>'+(r.m&&r.m.last?esc(r.m.last):'Toque para conversar')+'</small></span>'+(r.ts?'<time>'+hm(r.ts)+'</time>':'')+(r.un?'<i class="bfc-bd">•</i>':'')+'</button>'}).join('');
 }
 function badge(){
  const me=String(gS().pid||''),sn=seen();let n=0;
@@ -5314,6 +5370,7 @@ function go(){
 box.addEventListener('click',e=>{
  if(e.target===box){close();return}
  if(e.target.closest('#bfcX')){close();return}
+ const pa=e.target.closest('.bfc-pa[data-p],.bfc-bn[data-p]');if(pa){openProf(pa.dataset.p);return}
  const bk=e.target.closest('#bfcBack');if(bk){curF=null;curName='';openFriends();return}
  const t=e.target.closest('.bfc-tab');if(t){if(tab!==t.dataset.t){tab=t.dataset.t;go()}return}
  const f=e.target.closest('.bfc-fr');if(f){curF=f.dataset.p;curName=f.dataset.n||'';L.querySelectorAll('.bfc-fr').forEach(x=>x.classList.toggle('on',x===f));const bd=f.querySelector('.bfc-bd');if(bd)bd.remove();openChat(curF)}
@@ -5348,243 +5405,6 @@ setInterval(()=>{const pid=String(gS().pid||'');if(pid&&(!unMeta||metaPid!==pid)
 window.BF_getFS=getFS;window.BFChat={open:show};
 })();
 </script>
-<style id="bf-voice-css">
-#bfVoice{position:fixed;z-index:8500;left:10px;top:38%;display:flex;flex-direction:column;align-items:flex-start;gap:5px;font-family:var(--f-body,sans-serif);touch-action:none;user-select:none;-webkit-user-select:none}
-#bfVoice[hidden]{display:none}
-.bfv-bar{display:flex;align-items:center;gap:5px;padding:4px;border-radius:26px;background:rgba(12,20,34,.86);border:1px solid #33496b;box-shadow:0 4px 16px rgba(0,0,0,.5);backdrop-filter:blur(4px)}
-.bfv-g{width:16px;height:32px;display:grid;place-items:center;color:#6f86a8;font-size:14px;line-height:1;cursor:grab;touch-action:none;letter-spacing:-2px}
-.bfv-b,.bfv-s{border:0;cursor:pointer;display:grid;place-items:center;color:#fff;touch-action:manipulation}
-.bfv-b{width:42px;height:42px;border-radius:50%;background:#2b3d5c;transition:.15s}
-.bfv-s{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.1)}
-.bfv-b svg,.bfv-s svg{pointer-events:none}
-#bfVoice .bfv-lb{font:700 11px var(--f-body,sans-serif);color:#cfe0f7;padding:0 8px 0 2px}
-#bfVoice.on .bfv-lb,#bfVoice.on .bfv-lbw{display:none}
-#bfVoice.off .bfv-s{display:none}
-#bfVoice.on .bfv-b{background:#1f9d5c;box-shadow:0 0 0 3px rgba(65,217,138,.25)}
-#bfVoice.on.mute .bfv-b{background:#c0392b;box-shadow:0 0 0 3px rgba(255,77,87,.25)}
-#bfVoice.deaf #bfvSpk{background:#c0392b}
-#bfVoice.off .bfv-b{background:var(--accent,#ffb400);color:#2a1a00}
-.bfv-chips{display:flex;gap:4px;flex-wrap:wrap;max-width:220px}
-#bfVoice.off .bfv-chips{display:none}
-.bfv-c{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font:700 12px var(--f-body,sans-serif);color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.5);border:2px solid transparent;opacity:.5;transition:.12s;position:relative}
-.bfv-c.cn{opacity:1}
-.bfv-c.sp{border-color:#41d98a;box-shadow:0 0 0 3px rgba(65,217,138,.35);transform:scale(1.08)}
-.bfv-c.me.sp{border-color:#41d98a}
-.bfv-msg{max-width:230px;padding:6px 10px;border-radius:10px;background:rgba(12,20,34,.92);border:1px solid #33496b;color:#e6eefb;font-size:12px;line-height:1.3}
-.bfv-msg[hidden]{display:none}
-</style>
-<div id="bfVoice" class="off" hidden>
- <div class="bfv-bar">
-  <span class="bfv-g" id="bfvGrip" title="Arraste para mover">⋮⋮</span>
-  <button class="bfv-b" id="bfvMic" type="button" aria-label="Voz"></button>
-  <span class="bfv-lb" id="bfvLb">Voz</span>
-  <button class="bfv-s" id="bfvSpk" type="button" aria-label="Som dos amigos"></button>
-  <button class="bfv-s" id="bfvOut" type="button" aria-label="Sair do voz"><svg viewBox="0 0 24 24" width="16" height="16"><path d="M6 6l12 12M18 6L6 18" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></button>
- </div>
- <div class="bfv-chips" id="bfvChips"></div>
- <div class="bfv-msg" id="bfvMsg" hidden></div>
-</div>
-<script id="bf-voice-js">
-(function(){
-'use strict';
-/* Voz por WebRTC: o áudio vai direto entre os jogadores do mesmo time; o Firestore só serve para eles se acharem.
-   Se algum jogador não conseguir conectar (algumas redes 4G), coloque um servidor TURN em window.BF_TURN, ex:
-   window.BF_TURN=[{urls:'turn:SEU_SERVIDOR:3478',username:'user',credential:'senha'}] */
-const ICE=[{urls:['stun:stun.l.google.com:19302','stun:stun1.l.google.com:19302']}];
-const $q=s=>document.querySelector(s);
-const box=$q('#bfVoice'),chipsEl=$q('#bfvChips'),msgEl=$q('#bfvMsg'),micB=$q('#bfvMic'),spkB=$q('#bfvSpk');
-const gS=()=>{try{return (window.BF_getS&&window.BF_getS())||{}}catch(e){return {}}};
-const pidNow=()=>String(gS().pid||'');
-const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const hash=s=>{let h=0;s=String(s||'?');for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h%360};
-const avs=n=>{const h=hash(n);return 'background:linear-gradient(135deg,hsl('+h+' 62% 52%),hsl('+((h+40)%360)+' 62% 36%))'};
-const ini=n=>(Array.from(String(n||'?').trim())[0]||'?').toUpperCase();
-const MIC='<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 0 0-7 0v5A3.5 3.5 0 0 0 12 15zm6-3.5a6 6 0 0 1-12 0H4.5a7.5 7.5 0 0 0 6.75 7.46V22h1.5v-3.04A7.5 7.5 0 0 0 19.5 11.5z" fill="currentColor"/></svg>';
-const MICX='<svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 15a3.5 3.5 0 0 0 3.5-3.5v-5a3.5 3.5 0 0 0-7 0v5A3.5 3.5 0 0 0 12 15zm6-3.5a6 6 0 0 1-12 0H4.5a7.5 7.5 0 0 0 6.75 7.46V22h1.5v-3.04A7.5 7.5 0 0 0 19.5 11.5z" fill="currentColor"/><path d="M4 3l17 17" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>';
-const SPK='<svg viewBox="0 0 24 24" width="17" height="17"><path d="M3 9v6h4l5 4V5L7 9zm13.5 3a4.5 4.5 0 0 0-2.5-4v8a4.5 4.5 0 0 0 2.5-4z" fill="#fff"/></svg>';
-const SPKX='<svg viewBox="0 0 24 24" width="17" height="17"><path d="M3 9v6h4l5 4V5L7 9z" fill="#fff"/><path d="M15 9l6 6M21 9l-6 6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg>';
-let enabled=false,mic=null,muted=false,deaf=false,chan=null,want=null,wantKey='',sid='',peers={},pres={},unP=null,unS=null,hb=0,tok=0,FSm=null,pref=null,noWant=0,ac=null,lv={},msgT=0;
 
-function msg(t,ms){clearTimeout(msgT);msgEl.textContent=t;msgEl.hidden=!t;if(t)msgT=setTimeout(()=>{msgEl.hidden=true},ms||4500)}
-function fail(e){console.warn('voz',e);const c=e&&e.code||'';msg(c==='permission-denied'?'Voz sem permissão no servidor: falta publicar as regras (vp e vs) no Firestore.':'Erro no voz: '+((e&&e.message)||e),7000)}
-function allowed(){return want?want.m.map(x=>x.p):[]}
-function gathered(pc){return new Promise(res=>{if(pc.iceGatheringState==='complete')return res();const t=setTimeout(done,3000);function done(){clearTimeout(t);pc.removeEventListener('icegatheringstatechange',ch);res()}function ch(){if(pc.iceGatheringState==='complete')done()}pc.addEventListener('icegatheringstatechange',ch)})}
-
-/* ---- medidor de voz (quem está falando) ---- */
-function watchLevel(key,stream){
- try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();
-  const src=ac.createMediaStreamSource(stream),an=ac.createAnalyser();an.fftSize=512;src.connect(an);
-  lv[key]={an,buf:new Uint8Array(an.fftSize),on:false,src}}catch(e){}
-}
-function dropLevel(key){const l=lv[key];if(l){try{l.src.disconnect()}catch(e){}delete lv[key]}}
-setInterval(()=>{
- let ch=false;
- for(const k in lv){const l=lv[k];l.an.getByteTimeDomainData(l.buf);let s=0;for(let i=0;i<l.buf.length;i++){const v=(l.buf[i]-128)/128;s+=v*v}
-  const on=Math.sqrt(s/l.buf.length)>.04&&!(k==='me'&&muted);if(on!==l.on){l.on=on;ch=true}}
- if(ch)paintChips();
-},120);
-
-/* ---- conexões ---- */
-function mk(p){
- const pc=new RTCPeerConnection({iceServers:ICE.concat(window.BF_TURN||[])});
- const pr={pc,p,rsid:'',att:0,audio:null,to:0};peers[p]=pr;
- if(mic)mic.getTracks().forEach(t=>pc.addTrack(t,mic));
- pc.ontrack=e=>{const st=e.streams[0]||new MediaStream([e.track]);
-  if(!pr.audio){const a=document.createElement('audio');a.autoplay=true;a.setAttribute('playsinline','');a.style.display='none';box.appendChild(a);pr.audio=a}
-  pr.audio.srcObject=st;pr.audio.muted=deaf;const pl=pr.audio.play();if(pl&&pl.catch)pl.catch(()=>msg('Toque no microfone para ouvir os amigos.'));
-  dropLevel(p);watchLevel(p,st)};
- pc.onconnectionstatechange=()=>{paintChips();const s=pc.connectionState;if(s==='failed'||s==='closed'){if(peers[p]===pr&&s==='failed')retry(p)}else if(s==='disconnected'){setTimeout(()=>{if(peers[p]===pr&&pc.connectionState==='disconnected')retry(p)},5000)}};
- return pr;
-}
-function closePeer(p){
- const pr=peers[p];if(!pr)return;delete peers[p];clearTimeout(pr.to);
- try{pr.pc.ontrack=null;pr.pc.onconnectionstatechange=null;pr.pc.close()}catch(e){}
- if(pr.audio){try{pr.audio.srcObject=null;pr.audio.remove()}catch(e){}}
- dropLevel(p);paintChips();
-}
-async function sendSig(to,kind,data){
- const {FS,db,auth}=FSm;await FS.addDoc(FS.collection(db,'vs'),{chan,from:pidNow(),to:String(to),kind,data,sid,uid:auth.currentUser.uid,ts:Date.now()});
-}
-async function call(p,att){
- const my=tok;closePeer(p);const pr=mk(p);pr.rsid=pres[p]?pres[p].sid:'';pr.att=att||0;
- try{
-  const o=await pr.pc.createOffer();await pr.pc.setLocalDescription(o);await gathered(pr.pc);
-  if(my!==tok||peers[p]!==pr)return;
-  await sendSig(p,'offer',pr.pc.localDescription.sdp);
- }catch(e){fail(e)}
- pr.to=setTimeout(()=>{if(peers[p]===pr&&pr.pc.connectionState!=='connected')retry(p)},14000);
-}
-function retry(p){
- const pr=peers[p];if(!pr||!chan)return;
- const me=pidNow(),fresh=pres[p]&&Date.now()-pres[p].ts<60000;
- if(!fresh||!(+me<+p)||pr.att>=4)return;
- const my=tok,att=pr.att+1;closePeer(p);setTimeout(()=>{if(my===tok&&chan&&pres[p])call(p,att)},1500*att);
-}
-async function onSig(v){
- if(!enabled||!chan||!v||v.chan!==chan)return;
- const from=String(v.from);if(!allowed().includes(from)||from===pidNow())return;
- const my=tok;
- try{
-  if(v.kind==='offer'){
-   closePeer(from);const pr=mk(from);pr.rsid=v.sid||'';
-   await pr.pc.setRemoteDescription({type:'offer',sdp:v.data});
-   const a=await pr.pc.createAnswer();await pr.pc.setLocalDescription(a);await gathered(pr.pc);
-   if(my!==tok||peers[from]!==pr)return;
-   await sendSig(from,'answer',pr.pc.localDescription.sdp);
-  }else if(v.kind==='answer'){
-   const pr=peers[from];if(pr&&pr.pc.signalingState==='have-local-offer')await pr.pc.setRemoteDescription({type:'answer',sdp:v.data});
-  }
- }catch(e){console.warn('voz sinal',e)}
-}
-function sync(){
- if(!chan)return;const me=pidNow(),al=allowed();
- al.forEach(p=>{
-  if(p===me)return;
-  const pe=pres[p],fresh=pe&&Date.now()-pe.ts<60000,pr=peers[p];
-  if(!fresh){if(pr)closePeer(p);return}
-  if(pr&&pr.rsid&&pe.sid&&pr.rsid!==pe.sid){closePeer(p)}
-  if(!peers[p]&&+me<+p)call(p,0);
- });
- Object.keys(peers).forEach(p=>{if(!al.includes(p))closePeer(p)});
- paintChips();
-}
-async function joinChan(w){
- const my=++tok;leaveChan(true);tok=my;chan=w.chan;want=w;sid=Math.random().toString(36).slice(2,9);
- const me=pidNow();
- let X;try{X=await window.BF_getFS()}catch(e){msg('Servidor indisponível. Confira a internet.');return}
- if(my!==tok)return;
- const {FS,db,auth}=X;FSm=X;const u=auth.currentUser;
- if(!u||!me){msg('Entre na conta para usar o voz.');return}
- pref=FS.doc(db,'vp',chan+'_'+me);
- const beat=()=>FS.setDoc(pref,{chan,pid:me,uid:u.uid,sid,ts:Date.now()}).catch(fail);
- await beat();if(my!==tok)return;
- hb=setInterval(()=>{beat();sync()},15000);
- unP=FS.onSnapshot(FS.query(FS.collection(db,'vp'),FS.where('chan','==',chan)),snap=>{
-  const n={};snap.forEach(d=>{const v=d.data();if(v&&String(v.pid)!==me)n[String(v.pid)]=v});pres=n;sync()},fail);
- unS=FS.onSnapshot(FS.query(FS.collection(db,'vs'),FS.where('to','==',me)),snap=>{
-  snap.docChanges().forEach(c=>{if(c.type==='added'){const v=c.doc.data();FS.deleteDoc(c.doc.ref).catch(()=>{});onSig(v)}})},fail);
- paintChips();
-}
-function leaveChan(keep){
- clearInterval(hb);hb=0;
- if(unP){try{unP()}catch(e){}unP=null}if(unS){try{unS()}catch(e){}unS=null}
- Object.keys(peers).forEach(closePeer);pres={};
- if(pref&&FSm){try{FSm.FS.deleteDoc(pref).catch(()=>{})}catch(e){}}
- pref=null;chan=null;if(!keep){tok++}
-}
-/* ---- ligar / desligar ---- */
-async function enable(){
- if(enabled)return;
- if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){msg('Este navegador não deixa usar o microfone aqui.');return}
- try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume()}catch(e){}
- try{mic=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false})}
- catch(e){msg(e&&e.name==='NotAllowedError'?'Permita o microfone nas configurações do navegador para usar o voz.':'Não consegui abrir o microfone.',6000);return}
- enabled=true;muted=false;deaf=false;applyMic();watchLevel('me',mic);ui();
- if(want)joinChan(want);
-}
-function disable(){
- leaveChan(false);dropLevel('me');
- if(mic){mic.getTracks().forEach(t=>t.stop());mic=null}
- enabled=false;muted=false;deaf=false;ui();
-}
-function applyMic(){if(mic)mic.getAudioTracks().forEach(t=>{t.enabled=!muted})}
-function applyDeaf(){Object.values(peers).forEach(pr=>{if(pr.audio){pr.audio.muted=deaf;if(!deaf)pr.audio.play().catch(()=>{})}})}
-micB.addEventListener('click',()=>{
- if(!enabled){enable();return}
- muted=!muted;applyMic();ui();
- Object.values(peers).forEach(pr=>{if(pr.audio)pr.audio.play().catch(()=>{})});
-});
-spkB.addEventListener('click',()=>{deaf=!deaf;applyDeaf();ui()});
-$q('#bfvOut').addEventListener('click',disable);
-
-/* ---- interface ---- */
-function paintChips(){
- if(!enabled){chipsEl.innerHTML='';return}
- const me=pidNow();
- chipsEl.innerHTML=(want?want.m:[]).map(x=>{
-  const isMe=x.p===me,cn=isMe||(peers[x.p]&&peers[x.p].pc.connectionState==='connected'),sp=lv[isMe?'me':x.p]&&lv[isMe?'me':x.p].on;
-  return '<span class="bfv-c'+(isMe?' me':'')+(cn?' cn':'')+(sp?' sp':'')+'" style="'+avs(x.n||x.p)+'" title="'+esc(x.n||('#'+x.p))+(cn?'':' (conectando…)')+'">'+esc(ini(x.n||x.p))+'</span>'}).join('');
-}
-function ui(){
- box.classList.toggle('on',enabled);box.classList.toggle('off',!enabled);
- box.classList.toggle('mute',enabled&&muted);box.classList.toggle('deaf',enabled&&deaf);
- micB.innerHTML=enabled&&muted?MICX:MIC;
- spkB.innerHTML=deaf?SPKX:SPK;
- micB.title=!enabled?'Entrar no voz':(muted?'Ligar microfone':'Silenciar microfone');
- $q('#bfvLb').textContent=want&&want.kind==='match'?'Voz do time':'Voz da equipe';
- paintChips();
-}
-/* ---- qual canal eu deveria estar? (equipe no lobby, time dentro da partida) ---- */
-function tick(){
- const me=pidNow();let c={};try{c=(window.BF_ctx&&window.BF_ctx())||{}}catch(e){}
- let w=null;
- if(c.match&&c.match.m.length>1&&c.match.m.some(x=>x.p===me))w={chan:'m_'+c.match.mid+'_'+c.match.team,kind:'match',m:c.match.m};
- else if(c.tm&&c.tm.m.length>1&&c.tm.m.some(x=>x.p===me))w={chan:'t_'+c.tm.code,kind:'team',m:c.tm.m};
- const k=w?w.chan+'|'+w.m.map(x=>x.p).join(','):'';
- if(k!==wantKey){
-  const same=w&&chan&&w.chan===chan;wantKey=k;want=w;
-  if(enabled){if(same)sync();else if(w)joinChan(w);else leaveChan(true)}
-  ui();
- }
- noWant=w?0:noWant+1;
- if(enabled&&noWant>8)disable();       /* saiu da equipe/partida: fecha o microfone */
- box.hidden=!(want||enabled);
-}
-setInterval(tick,1000);tick();
-/* ---- arrastar o botão para onde você quiser ---- */
-(function(){
- const grip=$q('#bfvGrip');let d=null;
- try{const p=JSON.parse(localStorage.getItem('bf.voice.pos')||'null');if(p){box.style.left=p.x+'px';box.style.top=p.y+'px'}}catch(e){}
- grip.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const r=box.getBoundingClientRect();d={x:e.clientX-r.left,y:e.clientY-r.top};try{grip.setPointerCapture(e.pointerId)}catch(_){}});
- grip.addEventListener('pointermove',e=>{if(!d)return;const x=Math.max(0,Math.min(innerWidth-60,e.clientX-d.x)),y=Math.max(0,Math.min(innerHeight-60,e.clientY-d.y));box.style.left=x+'px';box.style.top=y+'px'});
- const end=()=>{if(!d)return;d=null;try{localStorage.setItem('bf.voice.pos',JSON.stringify({x:parseInt(box.style.left)||10,y:parseInt(box.style.top)||200}))}catch(e){}};
- grip.addEventListener('pointerup',end);grip.addEventListener('pointercancel',end);
- box.addEventListener('pointerdown',e=>e.stopPropagation());
-})();
-addEventListener('pagehide',()=>{try{leaveChan(false)}catch(e){}});
-ui();
-window.BFVoice={enable,disable,state:()=>({enabled,chan,peers:Object.keys(peers).map(p=>[p,peers[p].pc.connectionState])})};
-})();
-</script>
 
 </body></html>
