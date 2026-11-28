@@ -2134,6 +2134,13 @@ function wpnHud(){
  if(!M||M.over||M.paused||hedOn||c._i==null)return;
  if(c._i===M.p.slot){startReload(M.p);return}
  if(equipW(M.p,c._i))wpnHud()}))}
+/* Gladiadores: a mira só é bloqueada por obstáculo que a bala realmente não atravessa (considera a altura); coberturas baixas não impedem a mira vermelha */
+function aimLos(p,o,e,fc){
+ if(!M.arena)return los(o,e);
+ const d=dist(o,e),n=Math.max(2,Math.floor(d/16)),pz=p.z||0,ez=e.z||0,h0=rayH(fc,o.x,o.y)+pz,hy=clamp(rayH(fc,e.x,e.y),14+ez,60+ez);
+ const ig=M.obs.filter(q=>(q.k in CLIMB||q.k==='tower')&&((o.x>q.x&&o.x<q.x+q.w&&o.y>q.y&&o.y<q.y+q.h)||(p.gz>0&&p.x>q.x-p.r&&p.x<q.x+q.w+p.r&&p.y>q.y-p.r&&p.y<q.y+q.h+p.r)||(e.gz>0&&e.x>q.x-e.r&&e.x<q.x+q.w+e.r&&e.y>q.y-e.r&&e.y<q.y+q.h+e.r)));
+ for(let i=1;i<n;i++){const k=i/n;if(hitObsH(lerp(o.x,e.x,k),lerp(o.y,e.y,k),lerp(h0,hy,k),ig))return false}
+ return true}
 function aimTarget(p,fc,assist){
  if(!p.alive||M.cd>0)return null;
  const s=p.weap[p.slot],rg=s?s.w.rng:500;fc=fc||ffCam(p.x,p.y,p.ang,!!p.ads,camPP);
@@ -2143,7 +2150,7 @@ function aimTarget(p,fc,assist){
   const rx=e.x-fc.cx,ry=e.y-fc.cy,t=rx*fc.vx+ry*fc.vy;
   if(t<fc.t0-8)continue;
   if(Math.abs(rx*fc.vy-ry*fc.vx)>e.r+4+(assist?16:0))continue;/* assist: ao atirar perto do inimigo a mira é puxada para o corpo (como no Free Fire) */
-  const d=dist(p,e);if(d>rg||d>=bd||!los(o,e))continue;
+  const d=dist(p,e);if(d>rg||d>=bd||!aimLos(p,o,e,fc))continue;
   best=e;bd=d;
  }
  return best;
@@ -3326,7 +3333,7 @@ function draw(){
  const gk=gq+'|'+(g3._ps||.8);
  if(g3._w!==w||g3._h!==h||g3._g!==gk){g3._w=w;g3._h=h;g3._g=gk;ren.setPixelRatio([.45,.7,Math.min(devicePixelRatio||1,1.25)][gq]*(g3._ps||.8));ren.setSize(w,h,false);cam.aspect=w/h;scene.fog.far=[1500,2200,3000][gq];cam.far=14000}
  const q0=M.p,T3=q0.alive?q0:(M.ents.find(e=>e.alive&&e.team===q0.team)||q0),A3=T3.ang,ads=!!q0.ads,dd=ads?92:150,ca3=Math.cos(A3),sa3=Math.sin(A3);
- if(!isFinite(camPP))camPP=0;const fcm=ffCam(T3.x,T3.y,A3,ads,camPP);const jmpY=q0.z!=null?q0.z:(q0.jt>0?Math.sin((1-q0.jt/.7)*Math.PI)*70:0);fcm.H+=jmpY;if(camFr>.002&&q0.alive){/* câmera dá a volta pelo lado até a frente do personagem */const f=camFr*camFr*(3-2*camFr),hy=39.5+jmpY,sd=(fcm.cx-T3.x)*-sa3+(fcm.cy-T3.y)*ca3,hb=-((fcm.cx-T3.x)*ca3+(fcm.cy-T3.y)*sa3),ps=Math.PI*f,hh=hb+(40-hb)*f,dx=-ca3*Math.cos(ps)-camSd*sa3*Math.sin(ps),dz=-sa3*Math.cos(ps)+camSd*ca3*Math.sin(ps),nx=fcm.cx+fcm.vx*Math.cos(fcm.pt)*500,ny=fcm.H+Math.sin(fcm.pt)*500,nz=fcm.cy+fcm.vy*Math.cos(fcm.pt)*500,g=Math.min(1,f*3);fcm.cx=T3.x+dx*hh+(-sa3)*sd*(1-f);fcm.cy=T3.y+dz*hh+ca3*sd*(1-f);fcm.H=fcm.H+(hy+.5-fcm.H)*f;const tx=nx+(T3.x-nx)*g,ty=ny+(hy-ny)*g,tz=nz+(T3.y-nz)*g,ex=tx-fcm.cx,ey=ty-fcm.H,ez=tz-fcm.cy,lh=Math.hypot(ex,ez)||1;fcm.vx=ex/lh;fcm.vy=ez/lh;fcm.pt=Math.atan2(ey,lh)}cam.position.set(fcm.cx,fcm.H,fcm.cy);if(M.shk>.01){const k=M.shk*M.shk*14;cam.position.x+=(Math.random()-.5)*k;cam.position.y+=(Math.random()-.5)*k;cam.position.z+=(Math.random()-.5)*k}cam.lookAt(fcm.cx+fcm.vx*Math.cos(fcm.pt)*500,fcm.H+Math.sin(fcm.pt)*500,fcm.cy+fcm.vy*Math.cos(fcm.pt)*500);
+ if(!isFinite(camPP))camPP=0;const fcm=ffCam(T3.x,T3.y,A3,ads,camPP);const jmpY=q0.z!=null?q0.z:(q0.jt>0?Math.sin((1-q0.jt/.7)*Math.PI)*70:0);fcm.H+=jmpY;if(camFr>.002&&q0.alive){/* câmera dá a volta pelo lado até a frente do personagem */const f=camFr*camFr*(3-2*camFr),hy=39.5+jmpY,sd=(fcm.cx-T3.x)*-sa3+(fcm.cy-T3.y)*ca3,hb=-((fcm.cx-T3.x)*ca3+(fcm.cy-T3.y)*sa3),ps=Math.PI*f,hh=hb+(120-hb)*f,dx=-ca3*Math.cos(ps)-camSd*sa3*Math.sin(ps),dz=-sa3*Math.cos(ps)+camSd*ca3*Math.sin(ps),nx=fcm.cx+fcm.vx*Math.cos(fcm.pt)*500,ny=fcm.H+Math.sin(fcm.pt)*500,nz=fcm.cy+fcm.vy*Math.cos(fcm.pt)*500,g=Math.min(1,f*3);fcm.cx=T3.x+dx*hh+(-sa3)*sd*(1-f);fcm.cy=T3.y+dz*hh+ca3*sd*(1-f);fcm.H=fcm.H+(hy+.5-fcm.H)*f;const tx=nx+(T3.x-nx)*g,ty=ny+(hy-ny)*g,tz=nz+(T3.y-nz)*g,ex=tx-fcm.cx,ey=ty-fcm.H,ez=tz-fcm.cy,lh=Math.hypot(ex,ez)||1;fcm.vx=ex/lh;fcm.vy=ez/lh;fcm.pt=Math.atan2(ey,lh)}cam.position.set(fcm.cx,fcm.H,fcm.cy);if(M.shk>.01){const k=M.shk*M.shk*14;cam.position.x+=(Math.random()-.5)*k;cam.position.y+=(Math.random()-.5)*k;cam.position.z+=(Math.random()-.5)*k}cam.lookAt(fcm.cx+fcm.vx*Math.cos(fcm.pt)*500,fcm.H+Math.sin(fcm.pt)*500,fcm.cy+fcm.vy*Math.cos(fcm.pt)*500);
  {const fv=47-15*camBl;if(Math.abs(cam.fov-fv)>.01)cam.fov=fv}
  cam.updateProjectionMatrix();
  {const hr=new Date().getHours(),tm=S.tod||'por',timeMd=tm==='noite'?'n':tm==='por'?'s':tm==='dia'?'d':(hr<5||hr>=19?'n':(hr<7||hr>=17?'s':'d')),md=M.br?(M.mapTheme==='deserto'?'s':M.mapTheme==='cidade'?'n':'d'):timeMd;if(g3._m!==md){g3._m=md;setSky(md)}const theme='floresta';if(g3._mt!==theme){g3._mt=theme;ground.visible=theme!=='deserto';sand.visible=theme==='deserto';for(let i=0;i<16;i++)for(let j=0;j<16;j++){const v=Math.random();tx.fillStyle=theme==='cidade'?(v<.35?'#626d78':v<.7?'#707b86':v<.9?'#596571':'#818b95'):(v<.34?'#4f9a49':v<.58?'#5aa852':v<.78?'#468a40':v<.9?'#63b45a':v<.97?'#3f8039':'#7bc96c');tx.fillRect(i,j,1,1)}tex.needsUpdate=true}
