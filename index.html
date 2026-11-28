@@ -103,6 +103,41 @@
 .profile-shop-card .profile-price{font-family:var(--f-display);color:#ffd45a;font-size:14px}
 .profile-shop-card .btn{width:100%}
 </style>
+<style id="habCss">
+.hab-tabs{display:flex;gap:4px;margin-bottom:12px;flex-wrap:wrap}
+.hab-tabs button{padding:10px 20px;background:linear-gradient(180deg,#1b1530,#110c22);border:1px solid #3b2d66;color:#a99bd0;font-family:var(--f-display);font-size:12px;letter-spacing:.06em;clip-path:polygon(0 0,calc(100% - 12px) 0,100% 100%,0 100%)}
+.hab-tabs button.on{background:linear-gradient(180deg,#ffd21f,#f5a800);color:#1a1200;border-color:#ffd21f}
+.hab-tabs em{font-style:normal;opacity:.8;margin-left:4px}
+.hab-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media(max-width:620px){.hab-grid{grid-template-columns:1fr}}
+.hab-card{position:relative;display:flex;flex-direction:column;gap:8px;padding:12px;background:linear-gradient(160deg,#1d1236,#0d0919);border:1px solid #5a3fb0;box-shadow:inset 0 0 22px #7a4dff1a}
+.hab-card.eq{border-color:#ffc21a;box-shadow:0 0 14px #ffc21a40,inset 0 0 22px #ffc21a14}
+.hab-flag{position:absolute;top:0;right:0;padding:2px 8px;background:#ffc21a;color:#1a1200;font:700 9px var(--f-display);letter-spacing:.06em}
+.hab-top{display:flex;gap:12px;align-items:center}
+.hab-info b{display:block;font:700 15px var(--f-display);color:#fff;margin-bottom:3px}
+.hab-info p{margin:0;font-size:12px;line-height:1.35;color:#cbc3e6}
+.hab-ic{flex:none;display:grid;place-items:center;border-radius:50%;color:var(--hc);background:radial-gradient(circle at 35% 30%,var(--hc) -90%,var(--hd) 72%);border:2px solid var(--hc);filter:drop-shadow(0 0 6px var(--hc))}
+.hab-pr{display:flex;justify-content:center;align-items:center;gap:8px;font:700 14px var(--f-display);color:#fff}
+.hab-pr span{display:inline-flex;align-items:center;gap:4px}.hab-pr i{font-style:normal;color:#9d92c4;font-size:11px}
+.hab-bb{display:flex;gap:6px}
+.hab-buy{flex:1;padding:9px 6px;background:linear-gradient(180deg,#ffd21f,#f5a800);color:#1a1200;border:0;font:700 13px var(--f-display);letter-spacing:.04em;cursor:pointer}
+.hab-buy:disabled{background:#2c2446;color:#8a7fb0;cursor:default}
+.hab-buy.rm{background:linear-gradient(180deg,#5b4a96,#40336f);color:#fff}
+.hab-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:8px 0 16px}
+.hab-slot{display:flex;flex-direction:column;align-items:center;gap:6px;min-height:150px;padding:12px 8px;text-align:center;background:linear-gradient(160deg,#1a1230,#0d0919);border:2px dashed #4a3a80;color:#9d92c4}
+.hab-slot.full{border:2px solid #ffc21a;box-shadow:0 0 14px #ffc21a40;color:#cbc3e6}
+.hab-slot b{font:700 13px var(--f-display);color:#fff}.hab-slot small{font-size:11px;line-height:1.3}
+.hab-slot .hab-buy{width:100%;flex:none;margin-top:auto}
+.hab-plus{font:700 38px var(--f-display);color:#4a3a80;line-height:1;margin-top:18px}
+.hab-sub{font:700 12px var(--f-display);letter-spacing:.08em;color:#ffc21a;margin:4px 0 8px}
+@media(max-width:560px){.hab-slots{grid-template-columns:1fr}.hab-tabs button{padding:9px 12px;font-size:11px}}
+.habrow{display:flex;gap:6px;justify-content:center}
+.hab-hi{position:relative;display:inline-flex;opacity:.9}
+.hab-hi.act{opacity:1;filter:drop-shadow(0 0 7px #ffd21f)}
+.hab-hi i{position:absolute;right:-4px;bottom:-4px;min-width:14px;padding:0 3px;border-radius:7px;background:#000c;color:#fff;font:700 9px var(--f-display);font-style:normal;text-align:center}
+.mbar.shx i{background:linear-gradient(180deg,#6cc2ff,#2a7de0);transition:width .15s}
+.mbar.shx b{position:absolute;inset:0;display:grid;place-items:center;font:400 10px var(--f-display);color:#fff;text-shadow:0 1px 2px #000;pointer-events:none}
+</style>
 </head><body>
 <title>Blocks Fire</title><style>#rkIntro{position:absolute;z-index:40;left:max(12px,env(safe-area-inset-left,0px));top:34%;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 20px;background:rgba(10,16,28,.84);border:2px solid #ffd45a;border-radius:12px;pointer-events:none;opacity:0;font-family:var(--f-display);color:#ffd45a;text-shadow:0 2px 0 #000;text-align:center;transform-origin:left center}#rkIntro small{font-size:11px;letter-spacing:.14em;color:#cfe8ff}#rkIntro b{font-size:clamp(20px,5vw,30px);letter-spacing:.06em}#rkIntro.on{animation:rkI 3.4s ease forwards}@keyframes rkI{0%{opacity:0;transform:scale(.7)}12%{opacity:1;transform:scale(1.06)}20%{transform:scale(1)}85%{opacity:1}100%{opacity:0}}</style>
 <meta name="claude:viewport-fit-sides" content="cover">
@@ -404,7 +439,7 @@ input.txt{width:100%;max-width:300px;height:42px;background:#0f1724;color:var(--
     <button class="side" data-open="royale"><span data-ic="wheel"></span>Menu Royale</button>
     <button class="side" data-open="passe"><span data-ic="ticket"></span>Passe</button>
     <button class="side" data-open="missoes"><span data-ic="list"></span>Missões</button>
-    <button class="side" data-open="cubo"><span data-ic="cube"></span>Cubo</button>
+    <button class="side" data-open="habilidades"><span data-ic="hab"></span>Habilidades</button>
     <button class="side" data-open="correio" id="mailSide"><span style="display:inline-grid;place-items:center"><svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 6h18v12H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M3 7l9 7 9-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>Correio<span class="bdg" hidden></span></button>
   </nav>
   <aside class="right">
@@ -460,7 +495,7 @@ input.txt{width:100%;max-width:300px;height:42px;background:#0f1724;color:var(--
   <svg id="xhair" viewBox="0 0 64 64" width="64" height="64"><g fill="none" stroke="#fff" stroke-width="2.2" stroke-opacity=".92"><circle cx="32" cy="32" r="11"/></g><circle class="dt" cx="32" cy="32" r="2" fill="#fff"/></svg><svg id="rldR" viewBox="0 0 80 80" aria-hidden="true"><circle class="bg" cx="40" cy="40" r="34"/><circle class="fg" id="rldFg" cx="40" cy="40" r="34" pathLength="100"/></svg><div id="rldL" aria-live="polite"></div>
   <div class="hudbtns"><button class="hud hbtn" id="btnF" aria-label="Atirar" title="Atirar" style="--ac:#ff6b6b"><svg viewBox="0 0 32 32" aria-hidden="true"><g transform="rotate(38 16 16)"><path class="f" d="M16 2.5c3.4 2.8 5 6 5 9.5v10h-10V12c0-3.500 1.600-6.700 5-9.500z"/><rect class="f" x="10" y="23.500" width="12" height="4" rx="1.200"/><path d="M13 16v4" class="k"/></g><path d="M4 9l3 2M3 15h3.500M8 4l2 3"/></svg><span class="bl">ATIRAR</span></button><button class="hud hbtn" id="btnA" aria-label="Mirar" title="Mirar" style="--ac:#7fd6ff"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="9"/><path d="M16 3v7M16 22v7M3 16h7M22 16h7"/><circle class="f" cx="16" cy="16" r="2.200"/></svg><span class="bl">MIRAR</span></button><button class="hud hbtn" id="btnJ" aria-label="Pular" title="Pular" style="--ac:#7dffae"><svg viewBox="0 0 32 32" aria-hidden="true"><circle class="f" cx="16" cy="6.500" r="3.200"/><path class="b" d="M16 12v8.500M16 14.500l-6.500-5.500M16 14.500l6.500-5.500M16 20.500l-4.500 7M16 20.500l4.500 7"/></svg><span class="bl">PULAR</span></button><button class="hud hbtn" id="btnC" aria-label="Agachar" title="Agachar" style="--ac:#ffd45a"><svg viewBox="0 0 32 32" aria-hidden="true"><circle class="f" cx="10.500" cy="8" r="3.200"/><path class="b" d="M11 13l4.500 6.500h7.500M23 19.500v7.500M12.500 15l8.500-3"/></svg><span class="bl">AGACHAR</span></button><button class="hud hbtn" id="btnR" aria-label="Recarregar" title="Recarregar" style="--ac:#ffffff"><svg viewBox="0 0 32 32" aria-hidden="true"><path class="b" d="M25.500 14a9.500 9.500 0 0 0-16.500-4.500M6.500 18a9.500 9.500 0 0 0 16.500 4.500"/><path class="f" d="M27 4.500v10h-10zM5 27.500v-10h10z"/></svg><span class="bl">RECARR.</span></button><button class="hud hbtn" id="btnS" aria-label="Trocar arma" title="Trocar arma" style="--ac:#ffffff"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 11h18l-4-4M26 21H8l4 4"/></svg><span class="bl">TROCAR</span></button><button class="hud hbtn" id="btnRun" aria-label="Correr" title="Correr" style="--ac:#8dff9b"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M18 5l-5 7 5 3-4 5-6 7M18 15l6 3 3 7M12 12l-5-1" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="bl">CORRER</span></button><button class="hud hbtn" id="btnE" aria-label="Emote" title="Emote" style="--ac:#ff9fe0"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="11.500"/><circle class="f" cx="11.700" cy="13.500" r="1.700"/><circle class="f" cx="20.300" cy="13.500" r="1.700"/><path d="M10.500 18.500c1.300 3.200 3 4.500 5.500 4.500s4.200-1.300 5.500-4.500z" class="f"/></svg><span class="bl">EMOTE</span></button></div>
   <div class="hud" id="wpn"><button class="wc wm em" data-k="0" aria-label="Arma equipada"><b class="wa"></b><span class="wn"></span><i class="wr"></i><canvas width="142" height="156"></canvas></button><div class="wsc"><button class="wc ws em" data-k="1" aria-label="Arma guardada 1"><b class="wa"></b><i class="wk">2</i><canvas width="104" height="75"></canvas></button><button class="wc ws em" data-k="2" aria-label="Arma guardada 2"><b class="wa"></b><i class="wk">3</i><canvas width="104" height="75"></canvas></button></div></div>
-  <div class="hud hud-b"><div class="wline"><span id="wName">Pistola</span><span id="wAmmo">12/12</span></div><div class="mbar vb"><i id="shFill"></i><b id="vLbl">SEM COLETE</b></div><div class="hprow"><span id="hpTxt">HP 100/100</span><div class="mbar hp"><i id="hpTrail"></i><i id="hpFill"></i></div></div></div>
+  <div class="hud hud-b"><div class="habrow" id="habRow" hidden></div><div class="wline"><span id="wName">Pistola</span><span id="wAmmo">12/12</span></div><div class="mbar vb"><i id="shFill"></i><b id="vLbl">SEM COLETE</b></div><div class="mbar shx" id="habSh" hidden><i id="habShFill"></i><b id="habShLbl">ESCUDO 50</b></div><div class="hprow"><span id="hpTxt">HP 100/100</span><div class="mbar hp"><i id="hpTrail"></i><i id="hpFill"></i></div></div></div>
   <div id="banner"></div><div id="kmsg"></div><div id="gTop" hidden></div><div class="ov" id="gShop" hidden><div class="ovbox"><h2>Loja do Gladiador</h2><div id="gShopTm"></div><div class="muted" id="gShopSub"></div><div class="grid" id="gShopList"></div></div></div>
   <div id="dmgL"></div><div id="dirI" aria-hidden="true"></div>
   <svg id="hitm" viewBox="0 0 40 40"><path d="M7 7l8 8M33 7l-8 8M7 33l8-8M33 33l-8-8"/></svg>
@@ -954,14 +989,33 @@ function passReward(t){
 }
 const DUPG={comum:100,raro:150,epico:300,lendario:600,mitica:1200};
 
+/* ================= habilidades passivas ================= */
+const HAB=[
+ {id:'vida',n:'Vida Extra',d:'Regenera 10 de vida a cada 30 segundos após uma troca de tiros.',g:8000,m:199,c:'#2bff5c',c2:'#06300f'},
+ {id:'vel',n:'Mestre da Velocidade',d:'Aumenta em 10% a velocidade de movimento após eliminar um inimigo.',g:9000,m:249,c:'#ff4040',c2:'#3a0508'},
+ {id:'esc',n:'Escudo Protetor',d:'Concede um escudo extra de 50 pontos de vida.',g:8500,m:229,c:'#3aa0ff',c2:'#04203f'},
+ {id:'prec',n:'Precisão Avançada',d:'Aumenta em 15% a precisão ao mirar.',g:7500,m:199,c:'#ff5a6a',c2:'#3a060d'},
+ {id:'corpo',n:'Corpo Rápido',d:'Aumenta em 15% a velocidade de corrida.',g:7000,m:179,c:'#b872ff',c2:'#1f0a45'},
+ {id:'sobr',n:'Sobrevivente',d:'Recupera 5 de vida a cada eliminação.',g:9000,m:249,c:'#ff4a4a',c2:'#3a0a0a'}
+];
+/* valores dos efeitos (única fonte): ajuste aqui */
+const HABX=Object.freeze({vidaHp:10,vidaT:30,velMul:1.10,velT:5,escSh:50,precMul:.85,corpoMul:1.15,sobrHp:5});
+const habOf=id=>HAB.find(h=>h.id===id);
+/* salva na hora (local + nuvem) e impede trocar habilidades no meio de uma partida */
+function habSaveNow(){save();try{window.BF_cloudFlush&&window.BF_cloudFlush()}catch(e){}}
+const habLocked=()=>{try{return state==='match'&&!!M&&!M.over}catch(e){return false}};
+function habFix(){const ok=new Set(HAB.map(h=>h.id));
+ S.hab=Array.isArray(S.hab)?Array.from(new Set(S.hab.filter(x=>ok.has(x)))):[];
+ S.habEq=Array.isArray(S.habEq)?Array.from(new Set(S.habEq.filter(x=>S.hab.includes(x)))).slice(0,3):[]}
+
 /* ================= estado ================= */
 const GUEST='blocksfire.v1.guest';let KEY=GUEST;
 (function(){try{const o=localStorage.getItem('blocksfire.v1');if(o){let j=null;try{j=JSON.parse(o)}catch(_){}if(j&&!j.acct&&!localStorage.getItem(GUEST))localStorage.setItem(GUEST,o);localStorage.removeItem('blocksfire.v1')}}catch(_){}})();
 const DEF={name:'Jogador',gems:240,gold:406,xp:0,level:1,skin:'recruta',skins:['recruta'],weapon:'pistola',weapons:['pistola'],evo:{},
- stats:{matches:0,wins:0,kills:0,dmg:0,best:0},passXp:0,passClaimed:[],mday:'',mprog:{},mclaimed:{},cubeDay:'',royDay:'',mode:'solo',gm:'normal',tt:'solo',mapTheme:'floresta',diff:'normal',squad:[],sound:true,rp:0,tutDone:false,pun:[],pfp:'',pbn:'',profileOwned:[],profileEquipped:''};
+ stats:{matches:0,wins:0,kills:0,dmg:0,best:0},passXp:0,passClaimed:[],mday:'',mprog:{},mclaimed:{},cubeDay:'',royDay:'',mode:'solo',gm:'normal',tt:'solo',mapTheme:'floresta',diff:'normal',squad:[],sound:true,rp:0,tutDone:false,pun:[],pfp:'',pbn:'',profileOwned:[],profileEquipped:'',hab:[],habEq:[]};
 function load(){try{const s=localStorage.getItem(KEY);if(s){const o=JSON.parse(s);return Object.assign(JSON.parse(JSON.stringify(DEF)),o)}}catch(e){}return JSON.parse(JSON.stringify(DEF))}
 let S=load();window.BF_getS=()=>S;onlyStart();const SAVE=()=>S;SKINS.filter(x=>x.free).forEach(x=>{if(!S.skins.includes(x.id))S.skins.push(x.id)});
-function onlyStart(){const have=Array.isArray(S.skins)?S.skins:[];S.skins=['recruta'].concat(['rosaneon','cianoneon','skin829','cinzasombrio','vermelhofogo','azulcosmico','itachi','gojo','itadori','megume','naruto','sakura','luffy','tangiro','zoro'].filter(k=>have.includes(k)));if(!S.skins.includes(S.skin))S.skin='recruta';if(!S.fit)S.fit={};{const pk=new Set(Array.isArray(S.pun)?S.pun:[]);S.skins.forEach(k=>pk.add(k));S.pun=PORD.filter(k=>k!=='ver'&&pk.has(k));if(typeof S.pfp!=='string')S.pfp='';if(typeof S.pbn!=='string')S.pbn='';if(!Array.isArray(S.profileOwned))S.profileOwned=[];if(typeof S.profileEquipped!=='string')S.profileEquipped=''}}
+function onlyStart(){habFix();const have=Array.isArray(S.skins)?S.skins:[];S.skins=['recruta'].concat(['rosaneon','cianoneon','skin829','cinzasombrio','vermelhofogo','azulcosmico','itachi','gojo','itadori','megume','naruto','sakura','luffy','tangiro','zoro'].filter(k=>have.includes(k)));if(!S.skins.includes(S.skin))S.skin='recruta';if(!S.fit)S.fit={};{const pk=new Set(Array.isArray(S.pun)?S.pun:[]);S.skins.forEach(k=>pk.add(k));S.pun=PORD.filter(k=>k!=='ver'&&pk.has(k));if(typeof S.pfp!=='string')S.pfp='';if(typeof S.pbn!=='string')S.pbn='';if(!Array.isArray(S.profileOwned))S.profileOwned=[];if(typeof S.profileEquipped!=='string')S.profileEquipped=''}}
 function save(){onlyStart();if(!KEY)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}try{paintProf()}catch(_){}}
 function checkDay(){if(S.mday!==today()){S.mday=today();S.mprog={};S.mclaimed={};save()}}
 function addProg(id,n){checkDay();S.mprog[id]=(S.mprog[id]||0)+n;S.mprog[id+'x']=(S.mprog[id+'x']||0)+n}
@@ -1631,8 +1685,54 @@ P.loja={t:'Loja',r(){
  else if(shopTab==='skins')h+=`<p class="muted">Ao comprar uma skin você ganha o conjunto inteiro e as peças separadas: camisa, calça, sapato, cabelo (com franja) e rosto (com acessórios). Misture tudo no Cofre.</p><div class="grid">${SKINS.filter(x=>x.p>0&&!x.passOnly&&!x.mission&&!x.angel).sort((a,b)=>a.p-b.p).map(x=>skinCard(x,0)).join('')}</div>`
  else if(shopTab==='perfis')h+=`<p class="muted">Escolha um perfil. As imagens são as artes originais enviadas.</p><div class="grid profile-shop-grid">${PROFILE_ITEMS.map(profileItemCard).join('')}</div>`;
  else if(shopTab==='anjos')h+=`<p class="muted">Skins angelicais inspiradas no Free Fire. As grátis já são suas.</p><div class="grid">${SKINS.filter(x=>x.angel).map(x=>skinCard(x,0)).join('')}</div>`;
- else h+=`<p class="muted">Troque diamantes por ouro.</p><div class="exch">${[[50,450],[150,1500],[400,4400]].map(x=>`<button class="btn" data-act="exch" data-g="${x[0]}" data-o="${x[1]}">${IC.gem}${x[0]} → ${IC.coin}${x[1]}</button>`).join('')}</div>`;
+ else h+=`<p class="muted">Troque diamantes por ouro.</p><div class="exch">${[[50,450],[150,1500],[400,4400]].map(x=>`<button class="btn" data-act="exch" data-g="${x[0]}" data-o="${x[1]}">${IC.gem}${x[0]} → ${IC.coin}${x[1]}</button>`).join('')}</div><p class="muted" style="margin-top:16px">Troque ouro por diamantes. Diamantes são raros: pacotes pequenos saem bem mais caros por unidade.</p><div class="exch">${[[10,700],[50,3000],[100,5000],[500,22500],[1000,40000]].map(x=>`<button class="btn" data-act="exchg" data-g="${x[0]}" data-o="${x[1]}" ${S.gold<x[1]?'style="opacity:.55"':''}>${IC.coin}${x[1].toLocaleString('pt-BR')} → ${IC.gem}${x[0].toLocaleString('pt-BR')}</button>`).join('')}</div>`;
  return h}};
+let habTab='loja';
+const HABSVG={
+ vida:'<path d="M12 21s-8-5-8-11a4.5 4.5 0 0 1 8-2.5A4.5 4.5 0 0 1 20 10c0 6-8 11-8 11z"/><path d="M12 9v5M9.5 11.5h5"/>',
+ vel:'<path d="M13 2L5 14h6l-1 8 8-12h-6z"/>',
+ esc:'<path d="M12 2l8 3v6c0 5-3.5 9-8 11-4.5-2-8-6-8-11V5z"/><path d="M12 7v9"/>',
+ prec:'<circle cx="12" cy="12" r="6.5"/><path d="M12 2v5M12 17v5M2 12h5M17 12h5"/><circle cx="12" cy="12" r="1.2"/>',
+ corpo:'<circle cx="14.5" cy="4.5" r="2"/><path d="M12.5 8.5l-3.5 3 3 2.5-1 5M12.5 8.5l3.5 2.5 3-.5M10.5 19l-3 2.5"/>',
+ sobr:'<path d="M12 3a7 7 0 0 0-7 7c0 2.6 1.3 4.1 3 5v3h8v-3c1.7-.9 3-2.4 3-5a7 7 0 0 0-7-7z"/><circle cx="9.2" cy="10.8" r="1.4"/><circle cx="14.8" cy="10.8" r="1.4"/>'};
+const habIco=(id,sz)=>{const h=habOf(id);return `<span class="hab-ic" style="--hc:${h.c};--hd:${h.c2};width:${sz}px;height:${sz}px"><svg viewBox="0 0 24 24" width="${Math.round(sz*.58)}" height="${Math.round(sz*.58)}" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${HABSVG[id]}</svg></span>`};
+IC.hab='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c1 3.5 5 5.5 5 10a5 5 0 0 1-10 0c0-2 1-3 2-4 .3 1.4 1 2 2 2-.5-3 0-5.5 1-8z"/></svg>';
+const habFmt=n=>n.toLocaleString('pt-BR');
+function habCard(h){const own=S.hab.includes(h.id),eq=S.habEq.includes(h.id);
+ return `<div class="hab-card${eq?' eq':''}${own?' own':''}">${eq?'<span class="hab-flag">EQUIPADA</span>':''}<div class="hab-top">${habIco(h.id,66)}<div class="hab-info"><b>${h.n}</b><p>${h.d}</p></div></div>`
+ +`<div class="hab-pr"><span>${IC.coin}${habFmt(h.g)}</span><i>ou</i><span>${IC.gem}${h.m}</span></div>`
+ +(own?`<button class="hab-buy" disabled>${eq?'✓ EQUIPADA':'COMPRADA'}</button>`:`<div class="hab-bb"><button class="hab-buy" data-act="habBuy" data-id="${h.id}" data-c="gold">COMPRAR ${IC.coin}</button><button class="hab-buy" data-act="habBuy" data-id="${h.id}" data-c="gems">COMPRAR ${IC.gem}</button></div>`)+`</div>`}
+P.habilidades={t:'Habilidades',r(){
+ const n=S.habEq.length;
+ let h=`<div class="hab-tabs"><button class="${habTab==='loja'?'on':''}" data-act="habTab" data-id="loja">HABILIDADES PASSIVAS</button><button class="${habTab==='minhas'?'on':''}" data-act="habTab" data-id="minhas">MINHAS HABILIDADES <em>${n}/3</em></button></div>`;
+ if(habTab==='loja')return h+`<p class="muted">Compre com moedas ou diamantes. Depois equipe até 3 habilidades em Minhas Habilidades.</p><div class="hab-grid">${HAB.map(habCard).join('')}</div>`;
+ const slot=i=>{const id=S.habEq[i],x=id&&habOf(id);
+  return x?`<div class="hab-slot full">${habIco(id,58)}<b>${x.n}</b><small>${x.d}</small><button class="hab-buy rm" data-act="habUn" data-id="${id}">RETIRAR</button></div>`
+  :`<div class="hab-slot"><span class="hab-plus">+</span><b>ESPAÇO ${i+1}</b><small>Livre</small></div>`};
+ h+=`<p class="muted">Habilidades equipadas funcionam sozinhas nas partidas (Normal, Gladiadores e Ranqueado). Troque quando quiser, antes de começar a partida.</p><div class="hab-slots">${[0,1,2].map(slot).join('')}</div><div class="hab-sub">SUAS HABILIDADES (${S.hab.length}/${HAB.length})</div>`;
+ if(!S.hab.length)return h+`<p class="muted">Você ainda não comprou nenhuma habilidade. Abra a aba Habilidades Passivas.</p>`;
+ return h+`<div class="hab-grid">${S.hab.map(habOf).filter(Boolean).map(x=>{const eq=S.habEq.includes(x.id);
+  return `<div class="hab-card own${eq?' eq':''}">${eq?'<span class="hab-flag">EQUIPADA</span>':''}<div class="hab-top">${habIco(x.id,66)}<div class="hab-info"><b>${x.n}</b><p>${x.d}</p></div></div>${eq?`<button class="hab-buy rm" data-act="habUn" data-id="${x.id}">RETIRAR</button>`:`<button class="hab-buy" data-act="habEq" data-id="${x.id}">EQUIPAR</button>`}</div>`}).join('')}</div>`}};
+/* HUD das habilidades durante a partida */
+setInterval(()=>{try{const row=document.getElementById('habRow'),sb=document.getElementById('habSh');if(!row||!sb)return;
+ const p=typeof M!=='undefined'&&M&&M.p&&!M.over?M.p:null;
+ if(!p||!p.hb){row.hidden=true;sb.hidden=true;return}
+ let html='';Object.keys(p.hb).forEach(id=>{const on=(id==='vel'&&p.velT>0)||(id==='vida'&&p.vxOn),t=id==='vida'&&p.vxOn?Math.ceil(p.vxT):id==='vel'&&p.velT>0?Math.ceil(p.velT):'';
+  html+=`<span class="hab-hi${on?' act':''}" title="${habOf(id).n}">${habIco(id,24)}${t!==''?`<i>${t}</i>`:''}</span>`});
+ row.hidden=false;if(row._h!==html){row.innerHTML=html;row._h=html}
+ if(p.shM){sb.hidden=false;document.getElementById('habShFill').style.width=Math.max(0,Math.min(100,p.sh/p.shM*100))+'%';document.getElementById('habShLbl').textContent='ESCUDO '+Math.ceil(p.sh)}else sb.hidden=true}catch(e){}},150);
+/* efeitos em partida (cada jogador aplica as próprias 3 habilidades equipadas e validadas) */
+function habInit(e){habFix();const q=S.habEq.filter(x=>S.hab.includes(x)).slice(0,3),hb={};q.forEach(x=>{hb[x]=1});
+ e.hb=q.length?hb:null;e.shM=hb.esc?HABX.escSh:0;e.sh=e.shM;e.vxT=0;e.vxOn=false;e.velT=0}
+function habCombat(t,src){if(t&&t.hb&&t.hb.vida&&t.alive){t.vxOn=true;t.vxT=HABX.vidaT}
+ if(src&&src!==t&&src.hb&&src.hb.vida&&src.alive){src.vxOn=true;src.vxT=HABX.vidaT}}
+function habTick(p,dt){if(!p.hb||!p.alive)return;
+ if(p.velT>0)p.velT-=dt;
+ if(p.vxOn){p.vxT-=dt;if(p.vxT<=0){p.vxT=HABX.vidaT;if(p.hp<100)p.hp=Math.min(100,p.hp+HABX.vidaHp);if(p.hp>=100)p.vxOn=false}}
+ if(p.shM&&(p.sh>p.shM||!(p.sh>=0)))p.sh=Math.max(0,Math.min(p.shM,+p.sh||0))}
+function habKill(src){if(!src||!src.hb)return;
+ if(src.hb.sobr&&src.alive)src.hp=Math.min(100,src.hp+HABX.sobrHp);
+ if(src.hb.vel)src.velT=HABX.velT}
 P.personagens={t:'Personagens',r:()=>`<div class="grid">${SKINS.map(s=>skinCard(s,0)).join('')}</div>`};
 P.armas={t:'Armas',r:()=>`<div class="grid">${WEAPONS.map(w=>weaponCard(w,0)).join('')}</div>`};
 P.evolutivas={t:'Armas evolutivas',r(){
@@ -1692,6 +1792,14 @@ modal.addEventListener('click',e=>{
   if(a==='fit'){const[k,v]=id.split('|');S.fit=S.fit||{};
    if(k.slice(0,3)==='mx.'){const sl=k.slice(3);S.fit.mx=Object.assign({},S.fit.mx||{});if(v==='x')delete S.fit.mx[sl];else S.fit.mx[sl]=v}
    save();return renderPanel()}
+  if(a==='habTab'){habTab=id==='minhas'?'minhas':'loja';return renderPanel()}
+  if(a==='habEq'){if(habLocked())return toast('Troque as habilidades antes de iniciar a partida');if(!habOf(id)||!S.hab.includes(id))return toast('Compre esta habilidade primeiro');if(S.habEq.includes(id))return;if(S.habEq.length>=3)return toast('Você já equipou 3 habilidades. Retire uma primeiro.');S.habEq.push(id);habSaveNow();sfx.ui();return renderPanel()}
+  if(a==='habUn'){if(habLocked())return toast('Troque as habilidades antes de iniciar a partida');S.habEq=S.habEq.filter(x=>x!==id);habSaveNow();sfx.ui();return renderPanel()}
+  if(a==='habBuy'){const h=habOf(id);if(!h||S.hab.includes(id))return;const c=b.dataset.c==='gems'?'gems':'gold',pr=c==='gems'?h.m:h.g;
+   if(S[c]<pr)return toast(c==='gems'?'Diamantes insuficientes':'Moedas insuficientes');
+   S[c]-=pr;S.hab.push(id);habSaveNow();sfx.pick();refreshCur();renderPanel();
+   return showBuyReward({title:'HABILIDADE DESBLOQUEADA!',color:h.c,vis:'<div style="margin:30px 0 8px;display:grid;place-items:center">'+habIco(id,110)+'</div>',name:h.n,sub:'HABILIDADE PASSIVA',
+    equip:S.habEq.length<3?()=>{if(S.hab.includes(id)&&!S.habEq.includes(id)&&S.habEq.length<3){S.habEq.push(id);habSaveNow();toast(h.n+' equipada');if(cur==='habilidades'){habTab='minhas';renderPanel()}}}:null})}
   if(a==='tab'){shopTab=id;return renderPanel()}
  if(a==='equip'){S.skin=id;S.fit={};sfx.ui()}
  else if(a==='equipW'){S.weapon=id;sfx.ui()}
@@ -1700,6 +1808,7 @@ modal.addEventListener('click',e=>{
  else if(a==='unequipProfile'){if(!S.profileOwned.includes(id))return;S.profileEquipped='';S.pfp='recruta';save();sfx.ui();toast('Perfil removido');return renderPanel()}
  else if(a==='buySkin'){const s=skinOf(id),pr=b.dataset.disc?Math.floor(s.p*.75):s.p;if(S.skins.includes(id))return;if(s.gold){if(S.gold<pr)return toast('Ouro insuficiente');S.gold-=pr}else{if(S.gems<pr)return toast('Diamantes insuficientes');S.gems-=pr}S.skins.push(id);if(!Array.isArray(S.pun))S.pun=[];if(!S.pun.includes(id))S.pun.push(id);save();refreshCur();sfx.pick();return showSkinReward(id)}
  else if(a==='buyW'){const w=weaponOf(id),pr=b.dataset.disc?Math.floor(w.p*.75):w.p;if(S.gold<pr)return toast('Ouro insuficiente');S.gold-=pr;S.weapons.push(id);S.weapon=id;save();sfx.pick();refreshCur();return showBuyReward({title:'ARMA COMPRADA!',color:'#ffb400',vis:rwWeapon(id),name:BFV.esc(w.n),sub:'JÁ EQUIPADA'})}
+ else if(a==='exchg'){const g=+b.dataset.g,o=+b.dataset.o;if(!(g>0&&o>0))return;if(S.gold<o)return toast('Ouro insuficiente');S.gold-=o;S.gems+=g;save();sfx.pick();refreshCur();return showBuyReward({title:'COMPRA REALIZADA!',color:'#67dfff',vis:'<div class="big" style="width:72px;height:72px;margin:34px 0 10px">'+IC.gem+'</div>',name:'+'+g.toLocaleString('pt-BR')+' diamantes',sub:'CÂMBIO CONCLUÍDO'})}
  else if(a==='exch'){const g=+b.dataset.g,o=+b.dataset.o;if(S.gems<g)return toast('Diamantes insuficientes');S.gems-=g;S.gold+=o;save();sfx.pick();refreshCur();return showBuyReward({title:'COMPRA REALIZADA!',color:'#f2a900',vis:'<div class="big" style="width:72px;height:72px;margin:34px 0 10px">'+IC.coin+'</div>',name:'+'+o.toLocaleString('pt-BR')+' de ouro',sub:'CÂMBIO CONCLUÍDO'})}
  else if(a==='evo'){const lv=S.evo[id]||0,cost=150*(lv+1);if(S.gold<cost)return toast('Ouro insuficiente');S.gold-=cost;S.evo[id]=lv+1;save();sfx.pick();refreshCur();{const w=weaponOf(id);return showBuyReward({title:'ARMA EVOLUÍDA!',color:EVC[lv+1],vis:rwWeapon(id),name:BFV.esc(w.n)+' · Nv '+(lv+1),sub:'+'+(lv+1)*8+'% DE DANO'})}}
  else if(a==='claimM'){const m=MISSIONS.find(x=>x.id===id);if((S.mprog[id]||0)<m.goal||S.mclaimed[id])return;S.mclaimed[id]=1;S.gold+=m.r.gold||0;S.gems+=m.r.gems||0;if(m.r.skin&&!S.skins.includes(m.r.skin)){S.skins.push(m.r.skin);toast('Skin desbloqueada: '+skinOf(m.r.skin).n)}sfx.pick()}
@@ -1996,7 +2105,7 @@ function startMatch(cfg){
  const mkEnt=(o)=>Object.assign({x:0,y:0,r:16,hp:100,vl:0,vd:0,deadT:0,ang:rnd(0,TAU),alive:true,kills:0,cool:0,rel:0,slot:0,weap:[],bot:true,team:0,name:'',skin:'recruta',thinkT:0,target:null,dest:null,strafe:1,strafeT:0,sight:D.sight,spd:D.spd,hitT:0,respawn:0,lx:0,ly:0,stuckT:0,urgent:false,mate:false},o);
  const botWeap=()=>{const id=wpick([[15,'pistola'],[25,'smg'],[30,'rifle'],[18,'escopeta'],[12,'sniper'],[8,'revolver'],[7,'cacador'],[6,'plasma'],[5,'bastiao']]);return[mkW(id,D.dmg)]};
  const skinsPool=SKINS.filter(s=>!s.passOnly);
- const p=mkEnt({bot:false,name:S.name,ver:!!S.ver,skin:S.skin,spd:275,team:0,weap:[mkW(S.weapon,1+.08*(S.evo[S.weapon]||0))]});
+ const p=mkEnt({bot:false,name:S.name,ver:!!S.ver,skin:S.skin,spd:275,team:0,weap:[mkW(S.weapon,1+.08*(S.evo[S.weapon]||0))]});habInit(p);
  if(S.weapon!=='pistola'&&!arena)p.weap.push(mkW('pistola',1));
  if(!arena)for(const id of S.weapons){if(p.weap.length>=3)break;if(p.weap.some(q=>q.w.id===id)||!WEAPONS.some(x=>x.id===id))continue;p.weap.push(mkW(id,1+.08*(S.evo[id]||0)))}
  M.p=p;M.ents.push(p);
@@ -2042,7 +2151,7 @@ function gGive(e,id){const lv=(e===M.p&&S.weapons.includes(id))?(S.evo[id]||0):0
 function roundBegin(){
  const R=M.rd,W=M.W,spf=(t,i,s)=>[t?W-170:170,s<2?W/2:W/2-120+i*240/(s-1)];
  M.bullets=[];M.loot=[];M.parts=[];M.texts=[];M.lp=null;lootClose();M.cd=0;M.cdN=0;M.rec=0;camPP=0;camBl=0;lkY=lkP=0;camFr=0;
- for(const t of[0,1])gTeam(t).forEach((e,i)=>{const q=spf(t,i,gTeam(t).length);Object.assign(e,{x:q[0],y:q[1],lx:q[0],ly:q[1],hp:100,vl:0,vd:0,alive:true,deadT:0,target:null,dest:null,cool:0,rel:0,hitT:0,thinkT:0,stuckT:0,ang:t?Math.PI:0});e.ads=false;e.crouch=false;gGive(e,R.cw||'pistola')});
+ for(const t of[0,1])gTeam(t).forEach((e,i)=>{const q=spf(t,i,gTeam(t).length);Object.assign(e,{x:q[0],y:q[1],lx:q[0],ly:q[1],hp:100,vl:0,vd:0,alive:true,deadT:0,target:null,dest:null,cool:0,rel:0,hitT:0,thinkT:0,stuckT:0,ang:t?Math.PI:0});e.ads=false;e.crouch=false;if(e.shM)e.sh=e.shM;e.vxOn=false;e.velT=0;gGive(e,R.cw||'pistola')});
  M.cam.x=M.p.x;M.cam.y=M.p.y;
  R.state='shop';R.ft=0;R.humanPick=false;R.botT=2.2;R.shopW=0;R.ls=-1;R.applied=true;R.picker=null;R.pickT=GPICK;
  const pr=R.n%2===1;/* a escolha acontece a cada 2 rounds (1, 3 e 5); nos rounds 2 e 4 vale a arma anterior */
@@ -2182,7 +2291,7 @@ function tryFire(e){
  for(let i=0;i<w.pel;i++){
   const u=w.pel>1?(i-(w.pel-1)/2)/((w.pel-1)/2):0,fan=isP?u*(w.fan||0):0;
   let a=base+fan;
-  if(!isP)a+=(Math.random()-.5)*2*w.sp+(Math.random()-.5)*2*M.D.err*(w.pel>1?.3:1);else a+=(Math.random()-.5)*2*w.sp*((.25+(e.mv?.45:0)+(e.bloom||0)*.8)*(e.ads?(w.id==='sniper'?.2:.5):(w.id==='sniper'?2.8:w.id==='cacador'?1.6:1))*(e.crouch?.7:1)*(e.jt>0?1.8:1));
+  if(!isP)a+=(Math.random()-.5)*2*w.sp+(Math.random()-.5)*2*M.D.err*(w.pel>1?.3:1);else a+=(Math.random()-.5)*2*w.sp*((.25+(e.mv?.45:0)+(e.bloom||0)*.8)*(e.ads?(w.id==='sniper'?.2:.5):(w.id==='sniper'?2.8:w.id==='cacador'?1.6:1))*(e.crouch?.7:1)*(e.jt>0?1.8:1)*(e.ads&&e.hb&&e.hb.prec?HABX.precMul:1));
   const b={x:ox,y:oy,vx:Math.cos(a)*w.spd,vy:Math.sin(a)*w.spd,sp:w.spd,dmg:w.dmg*s.mult,life:w.rng/w.spd*(tg?1.25:1),own:e,team:e.team,cf,wid:w.id,bc:w.bc,gl,bl:w.bl,bt:w.bt};
 
   if(tg){b.lock=tg;b.fan=fan;b.sx=ox;b.sy=oy;b.tot=Math.max(30,Math.hypot(tg.x-ox,tg.y-oy));b.h0=h0;b.hz=hz;b.hy=clamp(hz,14+(tg.z||0),60+(tg.z||0));b.dh=w.pel>1?((i%3)-1)*6:0}
@@ -2229,11 +2338,12 @@ function bulletHit(b,e){
  M.parts.push({x:b.x,y:b.y,h:hy2,vx:0,vy:0,life:.1,max:.1,col:'#fff',s:head?14:10});for(let i=0;i<n;i++)M.parts.push({x:b.x,y:b.y,h:hy2,vx:rnd(-130,130)+b.vx*.12,vy:rnd(-130,130)+b.vy*.12,life:.35,max:.35,col,s:3.2});
 }
 function hurt(t,d,src){
- const res={hp:0,ab:0};if(!t.alive)return res;
+ const res={hp:0,ab:0};if(!t.alive)return res;habCombat(t,src);
  if(t.net){t.hitT=.12;if(src&&src===M.p)M.dmg+=d;NET.hit(t,d,src);res.hp=d;return res}
  const dealt=d;
  if(src&&t.vl>0&&t.vd>0){const V=VEST[t.vl],ab=Math.min(t.vd,d*V.abs);t.vd-=ab;d-=ab;res.ab=ab;
   if(t.vd<=.05){t.vl=0;t.vd=0;for(let i=0;i<8;i++)M.parts.push({x:t.x,y:t.y,h:26,vx:rnd(-120,120),vy:rnd(-120,120),life:.5,max:.5,col:V.col,s:4});if(t===M.p){addFeed('Seu colete quebrou');tone(180,.18,'sawtooth',.05,-80)}}}
+ if(src&&t.sh>0&&d>0){const sa=Math.min(t.sh,d);t.sh-=sa;d-=sa;if(t.sh<=.05){t.sh=0;if(t===M.p){addFeed('Seu escudo extra quebrou');tone(220,.15,'sawtooth',.05,-80)}}}
  res.hp=d;t.hp-=d;t.hitT=.12;
  if(src&&src===M.p)M.dmg+=dealt;
  if(t===M.p){M.flash=.3;if(!RM)M.shk=Math.min(1,(M.shk||0)+Math.min(.45,dealt/55));hudPulse();haptic(35);if(src&&src!==t&&src.x!=null)dirHit(src)}
@@ -2244,7 +2354,7 @@ function hurt(t,d,src){
 }
 function kill(t,src){t.kb=src&&src.id||'';const hs=!!t.hsK;t.hsK=false;if(t===M.p){M.deaths=(M.deaths||0)+1;M.streak=0;rlTok++;haptic([40,50,80])}
  t.alive=false;t.deadT=0;
- if(src&&src!==t){src.kills++;if(src===M.p){M.kills++;sfx.kill();if(hs)tone(1800,.1,'square',.05);haptic([20,30,50]);
+ if(src&&src!==t){habKill(src);src.kills++;if(src===M.p){M.kills++;sfx.kill();if(hs)tone(1800,.1,'square',.05);haptic([20,30,50]);
   const dk=M.t-(M.lk==null?-99:M.lk);M.streak=dk<7?(M.streak||0)+1:1;M.lk=M.t;const SL=['','','DUPLO','TRIPLO','QUÁDRUPLO'];
   killMsg((hs?'☠ HEADSHOT · ':'')+'ELIMINOU '+BFV.esc(t.name),M.streak>1?(SL[M.streak]||'MÚLTIPLO')+' · '+M.streak+' seguidas':M.kills+(M.kills>1?' eliminações':' eliminação'),M.streak>1?'#ff7a3c':'#ffd23f')}
   else if(t===M.p){const sw=src.weap&&src.weap[src.slot];killMsg('ELIMINADO POR '+BFV.esc(src.name),sw?sw.w.n+' · '+Math.round(dist(src,t)/10)+' m':'','#ff4d57')}}
@@ -2392,7 +2502,7 @@ function playerCtl(p,dt){
  if(p.fbT>0)p.fbT-=dt;
  if(p.fb||p.fbT>0)fire=true;
  const ma=(camFr>.002&&M.camYaw!=null&&isFinite(M.camYaw))?M.camYaw:p.ang,ca=Math.cos(ma),sa=Math.sin(ma);let mx=f*ca-r*sa,my=f*sa+r*ca;const l=Math.hypot(mx,my);p.mv=l>.12;if(l>1){mx/=l;my/=l}
- if(p.jt>0)p.jt-=dt;{const sm=SN().sm==null?.5:SN().sm,f=1-Math.exp(-dt*(60-46*sm)),a=lkY*f,b=lkP*f;lkY-=a;lkP-=b;if(p.alive){p.ang+=a;camPitch(b);aimGlue(p,dt,a,b,fire);{if(p.ba==null||!isFinite(p.ba))p.ba=p.ang;if(p.alive&&(fire||l>.12||p.ads)){const dd=Math.atan2(Math.sin(p.ang-p.ba),Math.cos(p.ang-p.ba));p.ba+=dd*Math.min(1,dt*14)}}if(camFr>0&&(fire||l>.12||p.ads))camFr=Math.max(0,camFr-dt*(l>.12?5:2.5))}else{lkY=lkP=0;camFr=0}camBl+=((p.ads?1:0)-camBl)*Math.min(1,dt*9);if(camBl<.001)camBl=0}const sprint=(p.sprint||keys.shift)&&l>.12&&!p.crouch&&!p.ads;const sm=(p.crouch?.55:1)*(p.ads?.7:1)*(p.jt>0?1.15:1)*(sprint?1.32:1);
+ if(p.jt>0)p.jt-=dt;habTick(p,dt);{const sm=SN().sm==null?.5:SN().sm,f=1-Math.exp(-dt*(60-46*sm)),a=lkY*f,b=lkP*f;lkY-=a;lkP-=b;if(p.alive){p.ang+=a;camPitch(b);aimGlue(p,dt,a,b,fire);{if(p.ba==null||!isFinite(p.ba))p.ba=p.ang;if(p.alive&&(fire||l>.12||p.ads)){const dd=Math.atan2(Math.sin(p.ang-p.ba),Math.cos(p.ang-p.ba));p.ba+=dd*Math.min(1,dt*14)}}if(camFr>0&&(fire||l>.12||p.ads))camFr=Math.max(0,camFr-dt*(l>.12?5:2.5))}else{lkY=lkP=0;camFr=0}camBl+=((p.ads?1:0)-camBl)*Math.min(1,dt*9);if(camBl<.001)camBl=0}const sprint=(p.sprint||keys.shift)&&l>.12&&!p.crouch&&!p.ads;const sm=(p.crouch?.55:1)*(p.ads?.7:1)*(p.jt>0?1.15:1)*(sprint?1.32*(p.hb&&p.hb.corpo?HABX.corpoMul:1):1)*(p.velT>0&&p.hb&&p.hb.vel?HABX.velMul:1);
  moveEnt(p,mx*p.spd*sm*dt,my*p.spd*sm*dt);
  if(fire)tryFire(p);
 }
@@ -2417,7 +2527,7 @@ function updateMatch(dt){
  if(M.cd>0)M.cd-=dt;
  for(const e of M.ents){
   if(!e.alive){
-   e.deadT+=dt;if(!M.br&&!M.arena&&!M.over){e.respawn-=dt;if(e.respawn<=0){const rg=e.team===0?[80,M.W*.4,M.W*.6,M.W-80]:[M.W*.6,M.W-80,80,M.W*.4],q=freePos(rg);e.x=q.x;e.y=q.y;e.alive=true;e.hp=100;e.vl=0;e.vd=0;e.deadT=0;e.target=null;M.loot=M.loot.filter(l=>l.ent!==e);e.weap.forEach(s=>{s.ammo=s.w.mag;s.res=s.w.mag*5});e.rel=0}}
+   e.deadT+=dt;if(!M.br&&!M.arena&&!M.over){e.respawn-=dt;if(e.respawn<=0){const rg=e.team===0?[80,M.W*.4,M.W*.6,M.W-80]:[M.W*.6,M.W-80,80,M.W*.4],q=freePos(rg);e.x=q.x;e.y=q.y;e.alive=true;e.hp=100;e.vl=0;e.vd=0;if(e.shM)e.sh=e.shM;e.vxOn=false;e.velT=0;e.deadT=0;e.target=null;M.loot=M.loot.filter(l=>l.ent!==e);e.weap.forEach(s=>{s.ammo=s.w.mag;s.res=s.w.mag*5});e.rel=0}}
    continue;
   }
   e.cool=Math.max(0,e.cool-dt);e.hitT=Math.max(0,e.hitT-dt);
@@ -2910,7 +3020,7 @@ CL.send=async(to,t,v,id2)=>{if(!CL.on||!S.pid)throw new Error('Entre com a conta
  catch(e){if(e&&e.conflict)throw e;S[cc]+=cost;save();refreshCur();throw e}}
 /* ===== Transferência segura: o progresso existe em UMA conta só ===== */
 const IDK=['pid','acct','friends','ga','gr','nn','ver','vtG','vtC','mail','name','squad','upd'];
-const TK=['gems','gold','xp','level','skin','skins','weapon','weapons','evo','stats','passXp','passClaimed','mday','mprog','mclaimed','cubeDay','royDay','fit','emote','rp','pun','pfp','pbn'];
+const TK=['gems','gold','xp','level','skin','skins','weapon','weapons','evo','stats','passXp','passClaimed','mday','mprog','mclaimed','cubeDay','royDay','fit','emote','rp','pun','pfp','pbn','hab','habEq'];
 const sha=async t=>hex(new Uint8Array(await crypto.subtle.digest('SHA-256',enc.encode(t)))),rid=n=>hex(crypto.getRandomValues(new Uint8Array(n))),cl=v=>JSON.parse(JSON.stringify(v));
 const ni=(v,m=1e9)=>Math.max(0,Math.min(m,Math.floor(+v)||0)),ids=(a,L)=>[...new Set((Array.isArray(a)?a:[]).filter(id=>L.some(x=>x.id===id)))];
 function cleanProg(o){const N={};N.gems=ni(o.gems);N.gold=ni(o.gold);N.xp=ni(o.xp);N.level=Math.max(1,ni(o.level,10000));
@@ -3531,7 +3641,7 @@ window.__v3=function(c,sk,cx,by,u,t,yaw,emote){
     gm.textContent='Enviamos um link para redefinir a senha no seu e-mail.';
   }));
   /* ===== Progresso na nuvem (Firestore): coleção players/{uid} ===== */
-  let fsP=null,pushT=null;
+  let fsP=null,pushT=null,dirtyC=false,habShape=true;
   function fsInit(){
     if(fsP)return fsP;
     fsP=(async()=>{
@@ -3547,8 +3657,14 @@ window.__v3=function(c,sk,cx,by,u,t,yaw,emote){
   async function cloudPush(){
     try{
       const {FS,db,auth}=await fsInit();const u=auth.currentUser;if(!u)return;
-      await FS.setDoc(FS.doc(db,'players',u.uid),{data:JSON.stringify(S),upd:S.upd||Date.now(),name:S.name||'',email:u.email||''});
-    }catch(e){console.warn('cloud push',e)}
+      dirtyC=false;
+      const base={data:JSON.stringify(S),upd:S.upd||Date.now(),name:S.name||'',email:u.email||''},ref=FS.doc(db,'players',u.uid);
+      if(habShape){
+        try{await FS.setDoc(ref,Object.assign({},base,{hab:Array.isArray(S.hab)?S.hab.slice(0,6):[],habEq:Array.isArray(S.habEq)?S.habEq.slice(0,3):[]}));return}
+        catch(e){if(e&&e.code==='permission-denied')habShape=false;else throw e}
+      }
+      await FS.setDoc(ref,base);
+    }catch(e){dirtyC=true;console.warn('cloud push',e)}
   }
   async function cloudSync(u){
     const {FS,db}=await fsInit();
@@ -3575,7 +3691,11 @@ window.__v3=function(c,sk,cx,by,u,t,yaw,emote){
     if(_si)_si(pub);goOnline(pub);
   };
   const _sv=save;
-  save=function(){_sv();if(window.BF_GOOGLE_USER){clearTimeout(pushT);pushT=setTimeout(cloudPush,2000)}};
+  save=function(){_sv();if(window.BF_GOOGLE_USER){dirtyC=true;clearTimeout(pushT);pushT=setTimeout(cloudPush,2000)}};
+  /* envia na hora ao comprar/equipar e ao sair da página (não perde habilidades) */
+  window.BF_cloudFlush=()=>{clearTimeout(pushT);return window.BF_GOOGLE_USER?cloudPush():Promise.resolve()};
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&dirtyC&&window.BF_GOOGLE_USER){clearTimeout(pushT);cloudPush()}});
+  addEventListener('pagehide',()=>{if(dirtyC&&window.BF_GOOGLE_USER){clearTimeout(pushT);cloudPush()}});
   /* ===== Online (IDs + equipes por código) usando o Firestore do projeto ===== */
   let onP=null,idT=null;
   const jclone=o=>JSON.parse(JSON.stringify(o));
@@ -4235,6 +4355,8 @@ function tlGhost(sk,L){
 /* ===== fim do lobby da equipe ===== */
 
 /* ================= Sincronização da partida online ================= */
+/* escudo extra só existe para quem declara a habilidade Escudo Protetor (clientes antigos, sem 'hb', mantêm o limite antigo) */
+const hCap=s=>typeof s.hb!=='string'?HABX.escSh:(s.hb.split(',').indexOf('esc')>=0?HABX.escSh:0);
 Object.assign(NET,{
  begin(cfg){
   this.on=true;this.cfg=cfg;this.mid=cfg.mid;this.host=cfg.host;this.iHost=cfg.host===S.pid;this.pg=M;
@@ -4251,7 +4373,7 @@ Object.assign(NET,{
  state(){
   const R=M.rd||{n:0},ents=[];
   for(const e of M.ents){if(e.net)continue;const w=e.weap[e.slot];
-   ents.push({i:e.id,x:Math.round(e.x*10)/10,y:Math.round(e.y*10)/10,a:Math.round(e.ang*1000)/1000,h:Math.round(e.hp*10)/10,vl:e.vl,vd:Math.round(e.vd*10)/10,al:e.alive?1:0,w:w?w.w.id:'',c:e.crouch?1:0,ad:e.ads?1:0,kb:e.kb||'',j:e.jt>0?Math.round(e.jt*100)/100:0,z:Math.round((e.z||0)*10)/10,em:e.emote?e.emote.id:'',et:e.emote?Math.round((M.t-e.emote.t0)*100)/100:0})}
+   ents.push({i:e.id,x:Math.round(e.x*10)/10,y:Math.round(e.y*10)/10,a:Math.round(e.ang*1000)/1000,h:Math.round(e.hp*10)/10,vl:e.vl,vd:Math.round(e.vd*10)/10,sh:Math.round((e.sh||0)*10)/10,hb:e.hb?Object.keys(e.hb).join(','):'',al:e.alive?1:0,w:w?w.w.id:'',c:e.crouch?1:0,ad:e.ads?1:0,kb:e.kb||'',j:e.jt>0?Math.round(e.jt*100)/100:0,z:Math.round((e.z||0)*10)/10,em:e.emote?e.emote.id:'',et:e.emote?Math.round((M.t-e.emote.t0)*100)/100:0})}
   const ak={};for(const id in this.peers)ak[id]=this.peers[id].hs;
   return{sq:++this.sq,rn:R.n,rp:this.rp,rw:this.iHost?this.rw:null,ents,hits:this.hits,shots:this.shots,ak}},
  /* envia o estado; se chegar um acerto durante o envio, manda de novo logo em seguida */
@@ -4307,15 +4429,15 @@ Object.assign(NET,{
    else if((ak&&(ak[e.pk.f]||0)>=e.pk.n&&!P.length)||now-e.pk.ts>2500){/* previsão errada (ex.: curou antes): volta à vida e desfaz o abate */
     const sr=e.pk.src;if(sr){sr.kills=Math.max(0,(sr.kills||0)-1);if(sr===M.p)M.kills=Math.max(0,(M.kills||0)-1)}
     if(M.loot)M.loot=M.loot.filter(l=>l.ent!==e);if(!M.br&&!M.arena&&sr&&M.score)M.score[sr.team]=Math.max(0,M.score[sr.team]-1);e.respawn=0;
-    e.pk=null;e.pd=[];e.alive=true;e.deadT=0;e.hp=s.h;e.vl=s.vl;e.vd=s.vd}}
-  if(e.alive){let ph=0,pa=0;for(const q of P){ph+=q.hp;pa+=q.ab}
-   e.hp=Math.max(0,s.h-ph);e.vl=s.vl;e.vd=Math.max(0,s.vd-pa);
+    e.pk=null;e.pd=[];e.alive=true;e.deadT=0;e.hp=s.h;e.vl=s.vl;e.vd=s.vd;e.sh=Math.max(0,Math.min(hCap(s),+s.sh||0))}}
+  if(e.alive){let ph=0,pa=0,psh=0;for(const q of P){ph+=q.hp;pa+=q.ab;psh+=q.sa||0}
+   e.hp=Math.max(0,s.h-ph);e.vl=s.vl;e.vd=Math.max(0,s.vd-pa);e.sh=Math.max(0,Math.min(hCap(s),+s.sh||0)-psh);
    if(!s.al){e.x=s.x;e.y=s.y;e.hp=0;kill(e,M.ents.find(q=>q.id===s.kb)||null)}}},
  /* mostra o dano na hora (vida e colete) e o abate assim que a vida prevista zera */
  pred(t,d,src,from,n){
   if(!t||!t.net||t.gone||!t.alive||!M.rd||M.rd.state!=='fight')return;
   let ab=0;const V=t.vl>0&&t.vd>0?VEST[t.vl]:null;if(V){ab=Math.min(t.vd,d*V.abs);t.vd-=ab}
-  const hp=d-ab;(t.pd||(t.pd=[])).push({f:from,n,hp,ab,ts:performance.now()});
+  let sa=0;if(t.sh>0){sa=Math.min(t.sh,d-ab);t.sh-=sa}const hp=d-ab-sa;(t.pd||(t.pd=[])).push({f:from,n,hp,ab,sa,ts:performance.now()});
   t.hp=Math.max(0,t.hp-hp);t.hitT=.12;
   if(t.hp<=0){t.pk={f:from,n,src,ts:performance.now()};kill(t,src)}},
  step(e,dt){
