@@ -4920,7 +4920,19 @@ setTimeout(()=>{fxWatch();fxBadge();presPush(true);if(FX.open){fxLoad();fxSync()
 <script>
 (function(){
 const A=document.getElementById('adm'),B=document.getElementById('admB'),q=s=>A.querySelector(s);
-(function(){const d=document.createElement('div');d.id='admDbg';d.hidden=true;d.style.cssText='position:fixed;left:6px;bottom:6px;z-index:2147483647;font:11px monospace;background:rgba(0,0,0,.8);color:#0f0;padding:3px 6px;border-radius:4px;pointer-events:none;max-width:92vw;overflow:hidden';document.body.appendChild(d);const id=t=>t?((t.tagName||'').toLowerCase()+(t.id?'#'+t.id:'')+(typeof t.className==='string'&&t.className?'.'+t.className.trim().split(/\s+/).join('.'):'')):'?';['pointerdown','click'].forEach(ev=>window.addEventListener(ev,e=>{if(A.hidden){d.hidden=true;return}d.hidden=false;d.textContent=ev+' → '+id(e.target)},true))})();let pid='',rt=0,ADM=null,ADB=null,admP=null;
+const ST=document.createElement('style');ST.textContent='#admT{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);transform:translateX(-50%);z-index:2147483000;width:min(440px,calc(100vw - 20px));box-sizing:border-box;padding:12px 14px;border-radius:10px;font:600 14px/1.35 system-ui,sans-serif;color:#fff;background:#2a2146;border:2px solid #9b7bff;box-shadow:0 8px 28px rgba(0,0,0,.65);white-space:pre-wrap;overflow-wrap:anywhere;pointer-events:none}#admT.ok{background:#0f3a22;border-color:#2ecc71}#admT.err{background:#4a1018;border-color:#ff4d57}#adm #aM{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;margin:0;padding:6px 0;background:rgba(18,8,31,.94)}';document.head.appendChild(ST);
+const T=document.createElement('div');T.id='admT';T.hidden=true;A.appendChild(T);let tt=0;
+function tell(k,x,ms){clearTimeout(tt);T.className=k;T.textContent=x;T.hidden=false;const d=ms===undefined?(k==='ok'?6000:k==='err'?15000:0):ms;if(d)tt=setTimeout(()=>{T.hidden=true},d)}
+const TMO=(p,ms)=>{let h;return Promise.race([p,new Promise((_,r)=>{h=setTimeout(()=>r(Object.assign(new Error('timeout'),{code:'timeout'})),ms||15000)})]).finally(()=>clearTimeout(h))};
+function FR(e){const c=String(e&&e.code||'').split('/').pop(),m=e&&e.message||'';
+ if(typeof navigator!=='undefined'&&navigator.onLine===false)return 'Sem internet no aparelho.';
+ if(c==='permission-denied')return 'Sem permissão no Firestore (permission-denied). As regras do banco não deixam este admin salvar nesse documento.';
+ if(c==='timeout')return 'O servidor não respondeu em 15s. Confira a internet. A ordem pode ter ficado na fila e ser aplicada depois: veja o jogador antes de repetir.';
+ if(c==='unavailable'||c==='deadline-exceeded')return 'Servidor indisponível ('+c+'). Confira a internet e tente de novo.';
+ if(c==='unauthenticated'||c==='user-token-expired'||c==='no-session')return 'Sessão do admin expirou. Toque em "Sair do admin" e entre de novo.';
+ if(c==='resource-exhausted')return 'Cota do Firebase esgotada (resource-exhausted).';
+ return c||m||String(e)}
+let pid='',rt=0,ADM=null,ADB=null,admP=null;
 const FBV='11.10.0',FBU='https://www.gstatic.com/firebasejs/'+FBV+'/';
 const FBCFG={apiKey:'AIzaSyDbFK2peiaKkGCCIzATtu-4fbG8186ccCk',authDomain:'blocks-fire-online.firebaseapp.com',projectId:'blocks-fire-online',storageBucket:'blocks-fire-online.firebasestorage.app',messagingSenderId:'970976117534',appId:'1:970976117534:web:4b816ca2d5294b4dbd7f0f'};
 function adminInit(){if(admP)return admP;admP=(async()=>{let F,AU,FS;
@@ -4929,7 +4941,7 @@ function adminInit(){if(admP)return admP;admP=(async()=>{let F,AU,FS;
  const app=F.getApps().find(a=>a.name==='admin')||F.initializeApp(FBCFG,'admin');
  const auth=AU.getAuth(app);try{await AU.setPersistence(auth,AU.inMemoryPersistence)}catch(e){}
  const db=FS.getFirestore(app),R=p=>FS.doc(db,...p.split('/'));
- return{AU,auth,adb:{doc:p=>({get:async()=>{const s=await FS.getDoc(R(p));return{data:()=>s.exists()?s.data():null}},set:async o=>{await FS.setDoc(R(p),JSON.parse(JSON.stringify(o)))}})}}})();
+ return{AU,auth,adb:{doc:p=>({get:async()=>{const s=await TMO(FS.getDoc(R(p)));return{data:()=>s.exists()?s.data():null}},set:async o=>{await TMO(FS.setDoc(R(p),JSON.parse(JSON.stringify(o))))}})}}})();
  admP.catch(()=>{admP=null});return admP}
 function out(){A.hidden=true;stop();const X=ADM;ADM=null;ADB=null;if(X)X.AU.signOut(X.auth).catch(()=>{})}
 function stop(){clearInterval(rt);rt=0}
@@ -4949,23 +4961,41 @@ function panel(){stop();B.innerHTML=`<h2>ADMIN</h2><div class="r"><input class="
 <div class="r"><input class="txt" id="aB" placeholder="Motivo do banimento"><button class="btn danger" data-a="ban">Banir</button><button class="btn" data-a="unban">Desbanir</button></div></div>
 <h2 style="margin-top:18px">NOVIDADE</h2><div class="r"><input class="txt" id="aNT" maxlength="60" placeholder="Título da novidade"></div><div class="r"><input class="txt" id="aNX" maxlength="300" placeholder="Texto"><button class="btn pri" id="aNS">Enviar a todos</button></div><h2 style="margin-top:18px">ATUALIZAÇÃO OBRIGATÓRIA</h2><p class="muted" id="aUS">Verificando…</p><div class="r"><button class="btn danger" id="aUa">Ativar bloqueio</button><button class="btn pri" id="aUd">Desativar bloqueio</button></div><button class="btn" id="aX">Sair do admin</button>`;
 q('#aX').onclick=out;const M=t=>q('#aM').textContent=t;
-const EM=e=>(e&&(e.code||e.message))||String(e);
+const EM=FR;
 const dbReady=async()=>{if(!ADB)throw new Error('Entre como admin primeiro.');return{db:ADB}};
 const US=t=>{const e=q('#aUS');if(e)e.textContent=t};
 const lockShow=async()=>{try{const d=(await (await dbReady()).db.doc('adm/lock').get()).data();US(d&&d.on?'Bloqueio ATIVO: jogadores devem buscar a nova versão do APK no Discord oficial.':'Bloqueio desativado: o jogo está liberado.')}catch(e){US('Não foi possível ler o estado: '+EM(e))}};
 const lockSet=async on=>{try{await (await dbReady()).db.doc('adm/lock').set({on:on?1:0,ts:Date.now()});US(on?'Bloqueio ATIVO: jogadores devem buscar a nova versão do APK no Discord oficial. Chega em até 15s.':'Bloqueio desativado. O jogo volta a funcionar em até 15s.');if(window.BFLock)window.BFLock.check()}catch(e){US('Não foi possível salvar: '+EM(e))}};
 q('#aUa').onclick=()=>lockSet(true);q('#aUd').onclick=()=>lockSet(false);lockShow();
-q('#aNS').onclick=async()=>{const t=q('#aNT').value.trim().slice(0,60),x=q('#aNX').value.trim().slice(0,300);if(!t)return M('Digite o título');try{const ref=(await dbReady()).db.doc('adm/news'),d=(await ref.get()).data()||{n:0,items:[]};d.n=(d.n||0)+1;d.items=(d.items||[]).slice(-19).concat({n:d.n,title:t,text:x,ts:Date.now()});await ref.set(d);M('Novidade enviada! Chega em até 20s.');q('#aNT').value='';q('#aNX').value=''}catch(e){M('Não foi possível salvar: '+EM(e))}};
+q('#aNS').onclick=async()=>{const t=q('#aNT').value.trim().slice(0,60),x=q('#aNX').value.trim().slice(0,300);if(!t)return M('Digite o título');try{const ref=(await dbReady()).db.doc('adm/news'),d=(await ref.get()).data()||{n:0,items:[]};d.n=(d.n||0)+1;d.items=(d.items||[]).slice(-19).concat({n:d.n,title:t,text:x,ts:Date.now()});await ref.set(d);M('Novidade enviada! Chega em até 20s.');tell('ok','✅ Novidade enviada a todos. Chega em até 20s.');q('#aNT').value='';q('#aNX').value=''}catch(e){M('Não foi possível salvar: '+EM(e));tell('err','❌ Não foi possível enviar a novidade: '+EM(e))}};
 q('#aF').onclick=async()=>{const v=q('#aI').value.trim();q('#aT').hidden=true;if(!/^\d{6}$/.test(v))return M('Digite o ID com 6 números');
- M('Buscando…');try{const C=await dbReady(),p=(await C.db.doc('ids/'+v).get()).data();if(!p)return M('ID não encontrado');const b=(await C.db.doc('adm/'+v).get()).data();pid=v;M('#'+v+' · '+p.name+' · Nível '+(p.level||1)+(b&&b.ban?' · BANIDO':'')+(b&&b.ver?' · VERIFICADO '+b.ver+' ✔':''));q('#aT').hidden=false}catch(e){M('Erro ao buscar: '+EM(e))}};
-q('#aT').onclick=async e=>{const b=e.target.closest('[data-a]');if(!b||!pid)return;const t=b.dataset.a,C={db:ADB},ref=C.db.doc('adm/'+pid);let v=0,id='';
- if(b.dataset.i){v=+q('#'+b.dataset.i).value;if(!v)return M('Digite um número')}
- if(t==='skin')id=q('#aS').value,v=+b.dataset.s;if(t==='weapon')id=q('#aW').value,v=+b.dataset.s;if(t==='rank')v=(+q('#aR').value||0)+1;
- try{const d=(await ref.get()).data()||{n:0,items:[]};
-  if(t==='ban'){d.ban=1;d.why=q('#aB').value.trim().slice(0,80)}else if(t==='unban'){d.ban=0;d.why=''}
-  else if(t==='verify'){d.ver=Math.max(0,Math.min(2,+b.dataset.s||0));const ir=C.db.doc('ids/'+pid),ip=(await ir.get()).data();if(ip){ip.ver=d.ver;await ir.set(ip)}}
+ M('Buscando…');try{const C=await dbReady(),p=(await C.db.doc('ids/'+v).get()).data();if(!p)return M('ID não encontrado');const b=(await C.db.doc('adm/'+v).get()).data();pid=v;M('#'+v+' · '+p.name+' · Nível '+(p.level||1)+(b&&b.ban?' · BANIDO':'')+(b&&b.ver?' · VERIFICADO '+b.ver+' ✔':''));q('#aT').hidden=false}catch(e){M('Erro ao buscar: '+EM(e));tell('err','❌ Erro ao buscar: '+EM(e))}};
+q('#aT').onclick=async e=>{const b=e.target.closest('[data-a]');if(!b)return;
+ if(!pid)return tell('err','Busque um jogador primeiro: digite o ID e toque em Buscar.');
+ if(b.disabled)return;
+ const t=b.dataset.a;let what='';b.disabled=true;tell('busy','⏳ Enviando para #'+pid+'…');
+ try{
+  if(!ADB)throw Object.assign(new Error('sem sessão'),{code:'no-session'});
+  const C={db:ADB},ref=C.db.doc('adm/'+pid),sel=x=>{const o=q(x);return o&&o.selectedOptions&&o.selectedOptions[0]?o.selectedOptions[0].textContent:''};let v=0,id='';
+  if(b.dataset.i){v=+q('#'+b.dataset.i).value;if(!v){M('Digite um número');return tell('err','Digite um número (diferente de 0) antes de tocar em Aplicar.')}}
+  if(t==='skin'){id=q('#aS').value;v=+b.dataset.s;what=(v>0?'dar':'tirar')+' skin '+sel('#aS')}
+  if(t==='weapon'){id=q('#aW').value;v=+b.dataset.s;what=(v>0?'dar':'tirar')+' arma '+sel('#aW')}
+  if(t==='rank'){v=(+q('#aR').value||0)+1;what='rank '+RK_NAMES[v-1]}
+  if(t==='gems')what=(v>0?'+':'')+v+' diamantes';
+  if(t==='gold')what=(v>0?'+':'')+v+' moedas';
+  if(t==='level')what='nível '+v;
+  const d=(await ref.get()).data()||{n:0,items:[]};
+  if(t==='ban'){d.ban=1;d.why=q('#aB').value.trim().slice(0,80);what='banir'}else if(t==='unban'){d.ban=0;d.why='';what='desbanir'}
+  else if(t==='verify'){d.ver=Math.max(0,Math.min(2,+b.dataset.s||0));what=d.ver?'Verificado Nível '+d.ver:'remover verificado'}
   else{d.n=(d.n||0)+1;d.items=(d.items||[]).slice(-49).concat({n:d.n,t,v,id})}
-  await ref.set(d);M(t==='verify'?(d.ver===2?'Verificado Nível 2 ativado! Os benefícios do Nível 1 são removidos; ficam só os do Nível 2: foto e banner exclusivos + bônus de 6.000 diamantes + 12.000 moedas a cada 1 dia.':d.ver===1?'Verificado Nível 1 ativado! Os benefícios do Nível 2 são removidos; ficam só a foto, o banner e o bônus do Nível 1: 200 diamantes a cada 2 horas + 1.000 moedas a cada 1 hora.':'Verificado removido. Todos os benefícios do verificado foram retirados.'):t==='rank'?'Rank '+RK_NAMES[v-1]+' enviado! Aplica na conta em até 20s.':'Feito! Itens positivos chegam no Correio do jogador em até 20s.')}catch(e){M('Não foi possível salvar: '+EM(e))}}}
+  await ref.set(d);
+  let aviso='';
+  if(t==='verify'){try{const ir=C.db.doc('ids/'+pid),ip=(await ir.get()).data();if(ip){ip.ver=d.ver;await ir.set(ip)}}catch(x){aviso=' (o selo público aparece quando o jogador sincronizar)'}}
+  M(t==='ban'?'Jogador banido. Vale em até 20s, quando a conta dele sincronizar.':t==='unban'?'Banimento removido. Vale em até 20s.':t==='verify'?(d.ver===2?'Verificado Nível 2 ativado! Os benefícios do Nível 1 são removidos; ficam só os do Nível 2: foto e banner exclusivos + bônus de 6.000 diamantes + 12.000 moedas a cada 1 dia.':d.ver===1?'Verificado Nível 1 ativado! Os benefícios do Nível 2 são removidos; ficam só a foto, o banner e o bônus do Nível 1: 200 diamantes a cada 2 horas + 1.000 moedas a cada 1 hora.':'Verificado removido. Todos os benefícios do verificado foram retirados.'):t==='rank'?'Rank '+RK_NAMES[v-1]+' enviado! Aplica na conta em até 20s.':'Feito! Itens positivos chegam no Correio do jogador em até 20s.');
+  tell('ok','✅ #'+pid+' · '+what+' · enviado, chega em até 20s'+aviso)
+ }catch(x){M('Não foi possível salvar: '+EM(x));tell('err','❌ Não foi possível salvar'+(what?' ('+what+')':'')+' em #'+pid+':\n'+EM(x))}
+ finally{b.disabled=false}};
+}
 })();
 </script>
 <style>
