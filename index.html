@@ -4941,7 +4941,22 @@ function adminInit(){if(admP)return admP;admP=(async()=>{let F,AU,FS;
  const app=F.getApps().find(a=>a.name==='admin')||F.initializeApp(FBCFG,'admin');
  const auth=AU.getAuth(app);try{await AU.setPersistence(auth,AU.inMemoryPersistence)}catch(e){}
  let db;try{db=FS.initializeFirestore(app,{experimentalForceLongPolling:true,useFetchStreams:false})}catch(e){db=FS.getFirestore(app)}const R=p=>FS.doc(db,...p.split('/'));
- return{AU,auth,adb:{doc:p=>({get:async()=>{const s=await TMO(FS.getDoc(R(p)));return{data:()=>s.exists()?s.data():null}},set:async o=>{await TMO(FS.setDoc(R(p),JSON.parse(JSON.stringify(o))))}})}}})();
+ /* Escritas do admin via REST (HTTPS): resposta imediata de sucesso/erro, sem a fila do SDK que travava em 30s */
+const FSV=v=>v===null||v===undefined?{nullValue:null}:typeof v==='boolean'?{booleanValue:v}:typeof v==='number'?(Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:v}):typeof v==='string'?{stringValue:v}:Array.isArray(v)?{arrayValue:{values:v.map(FSV)}}:{mapValue:{fields:Object.fromEntries(Object.entries(v).filter(([,x])=>x!==undefined).map(([k,x])=>[k,FSV(x)]))}};
+const UV=v=>{if('integerValue'in v)return Number(v.integerValue);if('doubleValue'in v)return v.doubleValue;if('stringValue'in v)return v.stringValue;if('booleanValue'in v)return v.booleanValue;if('nullValue'in v)return null;if('arrayValue'in v)return(v.arrayValue.values||[]).map(UV);if('mapValue'in v)return UF(v.mapValue.fields||{});if('timestampValue'in v)return v.timestampValue;return null};
+const UF=f=>Object.fromEntries(Object.entries(f).map(([k,x])=>[k,UV(x)]));
+const REST='https://firestore.googleapis.com/v1/projects/'+FBCFG.projectId+'/databases/(default)/documents/';
+const rest=async(method,p,body,mask)=>{const ac=new AbortController(),h=setTimeout(()=>ac.abort(),20000);
+ try{const hd={'Content-Type':'application/json'},u=auth.currentUser;if(u)hd.Authorization='Bearer '+await u.getIdToken();
+  const q=mask?'?'+mask.map(k=>'updateMask.fieldPaths='+encodeURIComponent(k)).join('&'):'';
+  const r=await fetch(REST+p+q,{method,headers:hd,body:body?JSON.stringify(body):undefined,signal:ac.signal});
+  if(r.status===404&&method==='GET')return null;
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok){const st=String(j.error&&j.error.status||'').toLowerCase().replace(/_/g,'-');const c=r.status===403?'permission-denied':r.status===401?'unauthenticated':r.status===429?'resource-exhausted':st||('http-'+r.status);throw Object.assign(new Error((j.error&&j.error.message)||('HTTP '+r.status)),{code:c})}
+  return j}
+ catch(e){if(e&&e.name==='AbortError')throw Object.assign(new Error('timeout'),{code:'timeout'});if(e&&!e.code&&e instanceof TypeError)throw Object.assign(new Error('rede'),{code:'unavailable'});throw e}
+ finally{clearTimeout(h)}};
+ return{AU,auth,adb:{doc:p=>({get:async()=>{const j=await rest('GET',p);return{data:()=>j&&j.fields?UF(j.fields):null}},set:async(o,keys)=>{const f=FSV(JSON.parse(JSON.stringify(o))).mapValue;if(keys){const only={};keys.forEach(k=>{if(k in f.fields)only[k]=f.fields[k]});await rest('PATCH',p,{fields:only},keys)}else await rest('PATCH',p,f)}})}}})();
  admP.catch(()=>{admP=null});return admP}
 function out(){A.hidden=true;stop();const X=ADM;ADM=null;ADB=null;if(X)X.AU.signOut(X.auth).catch(()=>{})}
 function stop(){clearInterval(rt);rt=0}
@@ -4990,7 +5005,7 @@ q('#aT').onclick=async e=>{const b=e.target.closest('[data-a]');if(!b)return;
   else{d.n=(d.n||0)+1;d.items=(d.items||[]).slice(-49).concat({n:d.n,t,v,id})}
   await ref.set(d);
   let aviso='';
-  if(t==='verify'){try{const ir=C.db.doc('ids/'+pid),ip=(await ir.get()).data();if(ip){ip.ver=d.ver;await ir.set(ip)}}catch(x){aviso=' (o selo público aparece quando o jogador sincronizar)'}}
+  if(t==='verify'){try{const ir=C.db.doc('ids/'+pid),ip=(await ir.get()).data();if(ip){await ir.set({ver:d.ver},['ver'])}}catch(x){aviso=' (o selo público aparece quando o jogador sincronizar)'}}
   M(t==='ban'?'Jogador banido. Vale em até 20s, quando a conta dele sincronizar.':t==='unban'?'Banimento removido. Vale em até 20s.':t==='verify'?(d.ver===2?'Verificado Nível 2 ativado! Os benefícios do Nível 1 são removidos; ficam só os do Nível 2: foto e banner exclusivos + bônus de 6.000 diamantes + 12.000 moedas a cada 1 dia.':d.ver===1?'Verificado Nível 1 ativado! Os benefícios do Nível 2 são removidos; ficam só a foto, o banner e o bônus do Nível 1: 200 diamantes a cada 2 horas + 1.000 moedas a cada 1 hora.':'Verificado removido. Todos os benefícios do verificado foram retirados.'):t==='rank'?'Rank '+RK_NAMES[v-1]+' enviado! Aplica na conta em até 20s.':'Feito! Itens positivos chegam no Correio do jogador em até 20s.');
   tell('ok','✅ #'+pid+' · '+what+' · enviado, chega em até 20s'+aviso)
  }catch(x){M('Não foi possível salvar: '+EM(x));tell('err','❌ Não foi possível salvar'+(what?' ('+what+')':'')+' em #'+pid+':\n'+EM(x))}
