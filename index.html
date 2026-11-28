@@ -2273,7 +2273,7 @@ function playerCtl(p,dt){
  if(p.fbT>0)p.fbT-=dt;
  if(p.fb||p.fbT>0)fire=true;
  const ca=Math.cos(p.ang),sa=Math.sin(p.ang);let mx=f*ca-r*sa,my=f*sa+r*ca;const l=Math.hypot(mx,my);p.mv=l>.12;if(l>1){mx/=l;my/=l}
- if(p.jt>0)p.jt-=dt;{const sm=SN().sm==null?.5:SN().sm,f=1-Math.exp(-dt*(60-46*sm)),a=lkY*f,b=lkP*f;lkY-=a;lkP-=b;if(p.alive){p.ang+=a;camPitch(b);camTurn(a,dt);aimGlue(p,dt,a,b,fire);if(camFr>0&&(fire||l>.12||p.ads))camFr=Math.max(0,camFr-dt*2.5)}else{lkY=lkP=0;camFr=0}camBl+=((p.ads?1:0)-camBl)*Math.min(1,dt*9);if(camBl<.001)camBl=0}const sprint=(p.sprint||keys.shift)&&l>.12&&!p.crouch&&!p.ads;const sm=(p.crouch?.55:1)*(p.ads?.7:1)*(p.jt>0?1.15:1)*(sprint?1.32:1);
+ if(p.jt>0)p.jt-=dt;{const sm=SN().sm==null?.5:SN().sm,f=1-Math.exp(-dt*(60-46*sm)),a=lkY*f,b=lkP*f;lkY-=a;lkP-=b;if(p.alive){p.ang+=a;camPitch(b);aimGlue(p,dt,a,b,fire);{if(p.ba==null||!isFinite(p.ba))p.ba=p.ang;if(p.alive&&(fire||l>.12||p.ads)){const dd=Math.atan2(Math.sin(p.ang-p.ba),Math.cos(p.ang-p.ba));p.ba+=dd*Math.min(1,dt*14)}}if(camFr>0&&(fire||l>.12||p.ads))camFr=Math.max(0,camFr-dt*2.5)}else{lkY=lkP=0;camFr=0}camBl+=((p.ads?1:0)-camBl)*Math.min(1,dt*9);if(camBl<.001)camBl=0}const sprint=(p.sprint||keys.shift)&&l>.12&&!p.crouch&&!p.ads;const sm=(p.crouch?.55:1)*(p.ads?.7:1)*(p.jt>0?1.15:1)*(sprint?1.32:1);
  moveEnt(p,mx*p.spd*sm*dt,my*p.spd*sm*dt);
  if(fire)tryFire(p);
 }
@@ -3234,7 +3234,7 @@ function draw(){
   {const gid=e.weap&&e.weap[e.slot]?e.weap[e.slot].w.id:null;if(o.gid!==gid){if(o.gun)o.g.remove(o.gun);o.gun=gid?gunModel(gid):null;o.gid=gid;if(o.gun)o.g.add(o.gun)}}
   if(e.alive){
    if(e.emote&&(M.t-e.emote.t0>3||(e===M.p&&mv>.6)))e.emote=null;const ps=e.emote?poseOf(e.emote.id,M.t-e.emote.t0):null;
-   o.g.position.set(e.x,(e.jt>0?Math.sin((1-e.jt/.7)*Math.PI)*70:0)+(ps?ps.bob*4:0),e.y);o.g.scale.set(CSC,(e.crouch?.78:1)*CSC,CSC);o.g.rotation.set(0,Math.PI/2-e.ang+(ps?ps.spin:0),0);
+   o.g.position.set(e.x,(e.jt>0?Math.sin((1-e.jt/.7)*Math.PI)*70:0)+(ps?ps.bob*4:0),e.y);o.g.scale.set(CSC,(e.crouch?.78:1)*CSC,CSC);o.g.rotation.set(0,Math.PI/2-(e===M.p&&e.ba!=null&&e.alive?e.ba:e.ang)+(ps?ps.spin:0),0);
    if(ps){o.AL.rotation.set(ps.AL[0],0,ps.AL[1]);o.AR.rotation.set(ps.AR[0],0,ps.AR[1]);o.L.rotation.set(ps.L[0],0,0);o.Rg.rotation.set(ps.R[0],0,0)}else{o.L.rotation.set(s,0,0);o.Rg.rotation.set(-s,0,0);o.AL.rotation.set(-s*.6,0,0);o.AR.rotation.set(GA.rx,0,GA.rz)}o.AL.scale.y=1;
    o.sh.position.set(e.x,.9,e.y);o.sh.scale.set(CSC,CSC,1);
    try{const wq=e.weap&&e.weap[e.slot],rt=wq?wq.w.rel/1000:0,rp=e.rel>0&&rt?1-e.rel/rt:0,kk=wq&&e.cool>0?Math.max(0,Math.min(1,1-(wq.w.rate/1000-e.cool)/.12)):0;
