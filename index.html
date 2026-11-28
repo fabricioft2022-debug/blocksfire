@@ -2587,7 +2587,7 @@ inp.addEventListener('pointerdown',e=>{
  if(e.pointerType==='mouse'){mouse.down=true;mouse.on=true;mouse.x=e.clientX;mouse.y=e.clientY;if(!document.pointerLockElement){try{const pr=inp.requestPointerLock();if(pr&&pr.catch)pr.catch(()=>{})}catch(_){}}return}
  mouse.on=false;mouse.down=false;
  for(const k of['L','R']){const t=stick[k];if(t.on&&!actP.has(t.id))relStick(k)}
- let side=e.clientX<innerWidth/2?'L':'R';if(stick[side].on){if(side==='L'&&!stick.R.on)side='R';else return}
+ let side=e.clientX<innerWidth/2?'L':'R';if(stick[side].on)return;/* 2º dedo na esquerda é ignorado: não pode virar câmera sem querer */
  const s=stick[side];
  s.on=true;s.id=e.pointerId;s.ox=e.clientX;s.oy=e.clientY;s.lx=e.clientX;s.ly=e.clientY;s.x=s.y=0;setBase(side,s.ox,s.oy,side==='L');
  try{inp.setPointerCapture(e.pointerId)}catch(_){}
@@ -2776,11 +2776,12 @@ $('#todSel').value=S.tod||'por';$('#todSel').addEventListener('change',e=>{S.tod
 $('#btnCfg').addEventListener('click',()=>{if(M&&!M.over)hudEdit(true)});
 hudApply();
 const fb=$('#btnF');fb.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();fb._id=e.pointerId;fb._t=e.pointerType;if(M){M.p.fb=true;M.p.fbT=.15}try{fb.setPointerCapture(e.pointerId)}catch(_){}});
-['pointerup','pointercancel','lostpointercapture'].forEach(t=>fb.addEventListener(t,()=>{if(M)M.p.fb=false;fb._ly=null}));
+['pointerup','pointercancel','lostpointercapture'].forEach(t=>fb.addEventListener(t,()=>{if(M)M.p.fb=false;fb._ly=null;fb._arm=false}));
 /* SUBIR CAPA: segurar o botão de tiro e arrastar para cima sobe a mira proporcionalmente (para baixo desce) */
-fb.addEventListener('pointerdown',e=>{fb._ly=e.clientY});
+fb.addEventListener('pointerdown',e=>{fb._ly=e.clientY;fb._y0=e.clientY;fb._arm=false});
 fb.addEventListener('pointermove',e=>{
  if(fb._ly==null||e.pointerId!==fb._id||!M||M.paused||M.over||!M.p.alive||!M.p.fb)return;
+ if(!fb._arm){if(Math.abs(e.clientY-fb._y0)<30){fb._ly=e.clientY;return}fb._arm=true;fb._ly=e.clientY;return}/* zona morta: tremida do dedo no botão não mexe a câmera */
  const dy=Math.max(-60,Math.min(60,e.clientY-fb._ly));fb._ly=e.clientY;
  if(!dy)return;
  lkP-=dy*.0035*1.3*SN().t*(SN().v||1)*(M.p.ads?SN().a:1)*(SN().iy?-1:1);if(!isFinite(lkP))lkP=0;camPT=performance.now()});
@@ -5081,4 +5082,206 @@ sched(0);setTimeout(()=>sched(0),700);
 window.BFAdapt={refresh:()=>sched(0)};
 })();
 </script>
+<style id="bf-chat-css">
+#bfChatBtn{position:relative}
+.bfc-bd{display:inline-block;min-width:15px;height:15px;border-radius:8px;background:var(--danger,#ff4d57);color:#fff;font:700 10px/15px var(--f-body,sans-serif);text-align:center;padding:0 4px;margin-left:5px;vertical-align:middle}
+#bfChatBtn .bfc-bd{position:absolute;top:-4px;right:-4px;margin:0}
+.bfc-bd[hidden]{display:none}
+#bfChat{position:fixed;inset:0;z-index:9000;background:rgba(5,9,15,.78);display:flex;align-items:center;justify-content:center;padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px) env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px)}
+#bfChat[hidden]{display:none}
+.bfc{width:min(780px,100%);height:min(470px,100%);background:var(--panel,#141d2b);border:1px solid var(--line,#2a3a52);display:flex;flex-direction:column;overflow:hidden;font-family:var(--f-body,sans-serif);color:var(--fg,#eaf1fb)}
+.bfc-h{display:flex;align-items:center;gap:6px;padding:6px 8px;border-bottom:1px solid var(--line,#2a3a52);background:var(--panel2,#1c2839)}
+.bfc-t{flex:1;display:flex;gap:6px}
+.bfc-tab{padding:8px 14px;border:1px solid var(--line,#2a3a52);background:transparent;color:var(--mut,#8fa3bf);font:700 13px var(--f-body,sans-serif);cursor:pointer}
+.bfc-tab.on{background:var(--accent,#ffb400);color:var(--accent-ink,#2a1a00);border-color:var(--accent,#ffb400)}
+.bfc-x{width:36px;height:36px;border:1px solid var(--line,#2a3a52);background:transparent;color:var(--fg,#eaf1fb);font-size:16px;cursor:pointer}
+.bfc-b{flex:1;display:flex;min-height:0}
+.bfc-l{width:178px;flex:none;border-right:1px solid var(--line,#2a3a52);overflow-y:auto;overscroll-behavior:contain}
+.bfc-l[hidden]{display:none}
+.bfc-fr{display:block;width:100%;text-align:left;padding:9px 10px;border:0;border-bottom:1px solid var(--line,#2a3a52);background:transparent;color:var(--fg,#eaf1fb);font:13px var(--f-body,sans-serif);cursor:pointer;position:relative}
+.bfc-fr.on{background:var(--panel2,#1c2839);box-shadow:inset 3px 0 0 var(--accent,#ffb400)}
+.bfc-fr b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:20px}
+.bfc-fr small{display:block;color:var(--mut,#8fa3bf);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bfc-fr .bfc-bd{position:absolute;right:8px;top:10px;margin:0}
+.bfc-r{flex:1;display:flex;flex-direction:column;min-width:0}
+.bfc-i{padding:6px 10px;font-size:12px;color:var(--mut,#8fa3bf);border-bottom:1px solid var(--line,#2a3a52)}
+.bfc-i[hidden]{display:none}
+.bfc-i.err{color:#fff;background:#7a1620}
+.bfc-m{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:5px;overscroll-behavior:contain}
+.bfc-m>p{color:var(--mut,#8fa3bf);font-size:13px;margin:auto;text-align:center;padding:10px}
+.bfc-msg{max-width:86%;padding:5px 8px;background:var(--panel2,#1c2839);border:1px solid var(--line,#2a3a52);font-size:13px;line-height:1.3;word-break:break-word;align-self:flex-start}
+.bfc-msg.me{align-self:flex-end;background:#1d3a2b;border-color:#2c6b49}
+.bfc-msg small{display:block;color:var(--mut,#8fa3bf);font-size:10px;margin-bottom:1px}
+.bfc-f{display:flex;gap:6px;padding:6px;border-top:1px solid var(--line,#2a3a52)}
+.bfc-f[hidden]{display:none}
+.bfc-f input{flex:1;min-width:0;padding:9px;background:var(--bg,#0b111b);border:1px solid var(--line,#2a3a52);color:var(--fg,#eaf1fb);font:16px var(--f-body,sans-serif)}
+.bfc-f button{padding:0 16px;border:0;background:var(--accent,#ffb400);color:var(--accent-ink,#2a1a00);font:700 13px var(--f-body,sans-serif);cursor:pointer}
+@media (max-width:560px){.bfc-l{width:116px}.bfc-tab{padding:8px 9px}}
+</style>
+<div id="bfChat" hidden>
+ <div class="bfc" role="dialog" aria-label="Chat">
+  <div class="bfc-h">
+   <div class="bfc-t"><button class="bfc-tab on" data-t="g" type="button">🌍 Global</button><button class="bfc-tab" data-t="f" type="button">👥 Amigos<i class="bfc-bd" id="bfcTabBd" hidden></i></button></div>
+   <button class="bfc-x" id="bfcX" type="button" aria-label="Fechar">✕</button>
+  </div>
+  <div class="bfc-b">
+   <div class="bfc-l" id="bfcL" hidden></div>
+   <div class="bfc-r">
+    <div class="bfc-i" id="bfcI" hidden></div>
+    <div class="bfc-m" id="bfcM"></div>
+    <form class="bfc-f" id="bfcF"><input id="bfcIn" maxlength="200" autocomplete="off" placeholder="Digite uma mensagem…"><button type="submit">Enviar</button></form>
+   </div>
+  </div>
+ </div>
+</div>
+<script id="bf-chat-js">
+(function(){
+'use strict';
+const FBV='11.10.0',FBU='https://www.gstatic.com/firebasejs/'+FBV+'/';
+const gS=()=>{try{return S}catch(e){return window.S||{}}};
+const esc=t=>String(t==null?'':t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $q=s=>document.querySelector(s);
+const box=$q('#bfChat'),L=$q('#bfcL'),M=$q('#bfcM'),I=$q('#bfcI'),F=$q('#bfcF'),IN=$q('#bfcIn');
+let fsP=null,tab='g',curF=null,unM=null,unMeta=null,metaPid='',starting=false,metas={},lastSend=0,gen=0;
+const SK='bf.chat.seen';
+const seen=()=>{try{return JSON.parse(localStorage.getItem(SK)||'{}')}catch(e){return{}}};
+const setSeen=(id,t)=>{const s=seen();s[id]=Math.max(+s[id]||0,t);try{localStorage.setItem(SK,JSON.stringify(s))}catch(e){}};
+const cid=(a,b)=>[String(a),String(b)].sort().join('_');
+const hm=t=>{const d=new Date(+t||0);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0')};
+
+function getFS(){
+ if(fsP)return fsP;
+ fsP=(async()=>{
+  if(!window.BF_fbInit)throw new Error('O servidor online ainda não carregou.');
+  const {auth}=await window.BF_fbInit();let FS;
+  try{FS=await import(FBU+'firebase-firestore.js')}
+  catch(e){FS=await import('https://cdn.jsdelivr.net/npm/firebase@'+FBV+'/firestore/+esm')}
+  return {FS,db:FS.getFirestore(auth.app),auth};
+ })();
+ fsP.catch(()=>{fsP=null});
+ return fsP;
+}
+function setInfo(t,err){I.hidden=!t;I.textContent=t||'';I.classList.toggle('err',!!err)}
+function setMsg(t){M.innerHTML='<p>'+esc(t)+'</p>'}
+function fail(e){
+ console.warn('chat',e);
+ const c=e&&e.code||'';
+ if(c==='permission-denied')setInfo('Sem permissão no servidor. Falta publicar as regras do chat no Firestore (arquivo firestore-chat-rules.txt).',true);
+ else setInfo('Erro no chat: '+((e&&e.message)||e),true);
+}
+async function who(){
+ const pid=gS().pid;let u=null;
+ try{const {auth}=await getFS();u=auth.currentUser}catch(e){setMsg('Não consegui conectar ao servidor. Confira a internet.');F.hidden=true;return null}
+ if(!u||!pid){setMsg('Entre com a sua conta para usar o chat.');F.hidden=true;return null}
+ return {pid:String(pid),uid:u.uid};
+}
+function stop(){if(unM){try{unM()}catch(e){}unM=null}}
+function paint(list,priv,me){
+ const near=M.scrollHeight-M.scrollTop-M.clientHeight<60;
+ if(!list.length){setMsg(priv?'Nenhuma mensagem ainda. Diga oi! 👋':'Ninguém falou ainda. Seja o primeiro! 👋');return}
+ M.innerHTML=list.map(m=>{const mine=String(m.pid)===me;
+  return '<div class="bfc-msg'+(mine?' me':'')+'">'+(priv?'<small>'+hm(m.ts)+'</small>':'<small>'+(mine?'Você':esc(m.name||'Jogador'))+' · #'+esc(m.pid)+' · '+hm(m.ts)+'</small>')+esc(m.text)+'</div>'}).join('');
+ if(near||M.dataset.first!==String(gen)){M.scrollTop=M.scrollHeight;M.dataset.first=String(gen)}
+}
+async function openGlobal(){
+ const g=++gen;stop();L.hidden=true;F.hidden=false;setInfo('');setMsg('Carregando…');
+ const me=await who();if(!me||g!==gen)return;
+ try{
+  const {FS,db}=await getFS();if(g!==gen)return;
+  const q=FS.query(FS.collection(db,'chat_global'),FS.orderBy('ts','desc'),FS.limit(60));
+  unM=FS.onSnapshot(q,s=>{if(g!==gen)return;setInfo('');paint(s.docs.map(d=>d.data()).reverse(),false,me.pid)},e=>{if(g===gen){setMsg('');fail(e)}});
+ }catch(e){fail(e)}
+}
+async function openFriends(){
+ const g=++gen;stop();L.hidden=false;setInfo('');
+ const me=await who();if(!me||g!==gen){L.hidden=true;return}
+ startMeta();renderList(g);
+ if(!curF){F.hidden=true;setMsg('Escolha um amigo na lista para conversar.');return}
+ openChat(curF,g);
+}
+async function openChat(fp,g){
+ curF=String(fp);g=g||++gen;if(g!==gen)return;stop();F.hidden=false;setInfo('');setMsg('Carregando…');
+ const me=await who();if(!me||g!==gen)return;
+ const id=cid(me.pid,curF);
+ try{
+  const {FS,db}=await getFS();if(g!==gen)return;
+  const q=FS.query(FS.collection(db,'chats',id,'msgs'),FS.orderBy('ts','desc'),FS.limit(80));
+  unM=FS.onSnapshot(q,s=>{if(g!==gen)return;setInfo('');const l=s.docs.map(d=>d.data()).reverse();paint(l,true,me.pid);
+   setSeen(id,Math.max(Date.now(),l.length?+l[l.length-1].ts||0:0));badge();renderList(g)},e=>{if(g===gen){setMsg('');fail(e)}});
+ }catch(e){fail(e)}
+}
+async function renderList(g){
+ const me=String(gS().pid||'');
+ const ids=new Set((gS().friends||[]).map(String));
+ Object.values(metas).forEach(m=>(m.members||[]).forEach(p=>{if(String(p)!==me)ids.add(String(p))}));
+ const sn=seen();
+ const rows=[...ids].map(p=>{const id=cid(me,p),m=metas[id]||null;return{p,id,m,ts:m?+m.ts||0:0,un:!!(m&&String(m.by)!==me&&(+m.ts||0)>(+sn[id]||0)&&!(curF===p&&!box.hidden&&tab==='f'))}}).sort((a,b)=>b.ts-a.ts);
+ if(!rows.length){L.innerHTML='<p style="padding:12px;font-size:12px;color:var(--mut,#8fa3bf)">Você ainda não tem amigos. Adicione pelo ID no botão Amigos.</p>';return}
+ const CLx=window.CL;
+ const ps=await Promise.all(rows.map(r=>CLx&&CLx.prof?CLx.prof(r.p).catch(()=>null):null));
+ if(g!=null&&g!==gen)return;
+ L.innerHTML=rows.map((r,i)=>{const d=ps[i],nm=d&&d.name?d.name:(r.m&&r.m.names&&r.m.names[r.p])||('#'+r.p);
+  return '<button type="button" class="bfc-fr'+(curF===r.p?' on':'')+'" data-p="'+esc(r.p)+'"><b>'+esc(nm)+'</b><small>'+(r.m&&r.m.last?esc(r.m.last):'#'+esc(r.p))+'</small>'+(r.un?'<i class="bfc-bd">•</i>':'')+'</button>'}).join('');
+}
+function badge(){
+ const me=String(gS().pid||''),sn=seen();let n=0;
+ Object.entries(metas).forEach(([id,m])=>{if(String(m.by)!==me&&(+m.ts||0)>(+sn[id]||0)&&!(curF&&cid(me,curF)===id&&!box.hidden&&tab==='f'))n++});
+ const b=$q('#bfChatBtn .bfc-bd'),t=$q('#bfcTabBd');
+ [b,t].forEach(e=>{if(!e)return;e.hidden=!n;e.textContent=n>9?'9+':n});
+}
+async function startMeta(){
+ const pid=String(gS().pid||'');
+ if(starting||!pid)return;
+ if(unMeta&&metaPid===pid)return;
+ starting=true;
+ try{
+  const {FS,db,auth}=await getFS();if(!auth.currentUser)return;
+  if(unMeta){try{unMeta()}catch(e){}unMeta=null;metas={}}
+  metaPid=pid;
+  const q=FS.query(FS.collection(db,'chats'),FS.where('members','array-contains',pid));
+  unMeta=FS.onSnapshot(q,snap=>{metas={};snap.forEach(d=>{metas[d.id]=d.data()});badge();if(!box.hidden&&tab==='f')renderList(null)},e=>{console.warn('chat meta',e);metaPid=''});
+ }catch(e){console.warn('chat meta',e)}
+ finally{starting=false}
+}
+function show(){box.hidden=false;go()}
+function go(){
+ box.querySelectorAll('.bfc-tab').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+ if(tab==='g')openGlobal();else openFriends();
+}
+box.addEventListener('click',e=>{
+ if(e.target===box){box.hidden=true;gen++;stop();return}
+ const t=e.target.closest('.bfc-tab');if(t){tab=t.dataset.t;go();return}
+ const f=e.target.closest('.bfc-fr');if(f){curF=f.dataset.p;L.querySelectorAll('.bfc-fr').forEach(x=>x.classList.toggle('on',x===f));const bd=f.querySelector('.bfc-bd');if(bd)bd.remove();openChat(curF);return}
+ if(e.target.closest('#bfcX')){box.hidden=true;gen++;stop();badge()}
+});
+['keydown','keyup','keypress'].forEach(k=>IN.addEventListener(k,e=>{e.stopPropagation();if(k==='keydown'&&e.key==='Escape'){box.hidden=true;gen++;stop()}}));
+F.addEventListener('submit',async e=>{
+ e.preventDefault();
+ const text=IN.value.trim().slice(0,200);if(!text)return;
+ const now=Date.now();if(now-lastSend<1200){setInfo('Calma! Espere um segundinho entre as mensagens.');return}
+ const me=await who();if(!me)return;
+ lastSend=now;IN.value='';
+ const name=String(gS().name||gS().acct||'Jogador').slice(0,24);
+ try{
+  const {FS,db}=await getFS();
+  if(tab==='g')await FS.addDoc(FS.collection(db,'chat_global'),{uid:me.uid,pid:me.pid,name,text,ts:now});
+  else{
+   if(!curF)return;const id=cid(me.pid,curF);
+   await FS.setDoc(FS.doc(db,'chats',id),{members:[me.pid,curF].sort(),last:text.slice(0,60),by:me.pid,ts:now,names:{[me.pid]:name}},{merge:true});
+   await FS.addDoc(FS.collection(db,'chats',id,'msgs'),{uid:me.uid,pid:me.pid,name,text,ts:now});
+  }
+ }catch(err){IN.value=text;fail(err)}
+});
+function mount(){
+ const tools=$q('.tools');if(!tools||$q('#bfChatBtn'))return !!$q('#bfChatBtn');
+ const b=document.createElement('button');b.className='sq';b.id='bfChatBtn';b.type='button';b.setAttribute('aria-label','Chat');b.title='Chat';
+ b.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" fill="currentColor"/><circle cx="8" cy="11" r="1.3" fill="#0b111b"/><circle cx="12" cy="11" r="1.3" fill="#0b111b"/><circle cx="16" cy="11" r="1.3" fill="#0b111b"/></svg><i class="bfc-bd" hidden></i>';
+ b.addEventListener('click',show);tools.prepend(b);return true;
+}
+if(!mount()){const t=setInterval(()=>{if(mount())clearInterval(t)},500);setTimeout(()=>clearInterval(t),20000)}
+setInterval(()=>{const pid=String(gS().pid||'');if(pid&&(!unMeta||metaPid!==pid))startMeta()},4000);
+window.BFChat={open:show};
+})();
+</script>
+
 </body></html>
